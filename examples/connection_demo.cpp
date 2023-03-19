@@ -1,4 +1,4 @@
-#include <zutano/library.h>
+#include <zutano/zutano.h>
 
 auto main() -> int {
     return 0;
