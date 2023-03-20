@@ -16,9 +16,12 @@ FetchContent_MakeAvailable(cpr)
 
 
 add_library(zutano SHARED
-        src/connection.cpp
-        src/database.cpp
-        src/collection.cpp)
+        src/Connection.cpp
+        src/Database.cpp
+        src/Collection.cpp
+        src/Request.cpp
+        src/Response.cpp
+        )
 
 target_link_libraries(zutano PRIVATE
         cpr::cpr
