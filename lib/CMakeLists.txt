@@ -16,11 +16,15 @@ FetchContent_MakeAvailable(cpr)
 
 
 add_library(zutano SHARED
+        src/connection.cpp
         src/database.cpp
-        )
+        src/collection.cpp)
 
 target_link_libraries(zutano PRIVATE
         cpr::cpr
+        )
+
+target_link_libraries(zutano PUBLIC
         nlohmann_json::nlohmann_json
         )
 
