@@ -1,37 +1,44 @@
 #include <zutano/zutano.h>
+#include <iostream>
 
 using namespace zutano;
 
 auto main() -> int {
 
-    auto conn = connection()
-            .endpoint("http://192.168.1.10")
-            .auth("root", "123");
+  try {
+	auto conn = Connection()
+		.Endpoint("http://10.211.55.4:8529/");
 
-    auto sys_db = conn.database("_system");
+	if (conn.Ping())
+	  std::cout << "Ping'ed OK" << std::endl;
 
-    sys_db.create_datatabase("demo");
+	auto sys_db = conn.Database("_system");
 
-    auto db = conn.database("demo");
+	sys_db.CreateDatatabase({"demo", .sharding="flexible", .allowConflict=true});
 
-    db.create_collection("students");
+	auto db = conn.Database("demo");
 
-    auto students = db.collection("students");
+	db.CreateCollection({"students", .allowConflict=true});
 
-    students.add_hash_index({.fields= {"name"}, .unique= true});
+	auto students = db.Collection("students");
 
-    students.insert({{"name", "jane"},
-                     {"age",  39}});
-    students.insert({{"name", "josh"},
-                     {"age",  18}});
-    students.insert({{"name", "judy"},
-                     {"age",  21}});
+	auto result = students.AddHashIndex({.fields= {"name"}, .unique= true});
 
-    auto cursor = db.execute("FOR doc IN students RETURN doc");
+	students.Insert({{"name", "jane5"},
+					 {"age", 39}}, {.overwrite=true});
+	students.Insert({{"name", "josh1"},
+					 {"age", 18}}, {.overwrite=true});
+	students.Insert({{"name", "judy1"},
+					 {"age", 21}}, {.overwrite=true});
 
-    for (auto doc: cursor) {
-        doc.dump();
-    }
+	auto cursor = db.Execute("FOR doc IN students RETURN doc");
 
-    return 0;
+	for (auto doc : cursor) {
+	  doc.dump();
+	}
+  } catch (std::exception &e) {
+	std::cout << e.what() << std::endl;
+  }
+
+  return 0;
 }
