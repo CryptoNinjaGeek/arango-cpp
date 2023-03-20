@@ -22,10 +22,10 @@ auto conn = connection()
 // Connect to "_system" database as root user.
 auto sys_db = conn.database("_system");
 
-// Create a new database named "test".
+// Create a new database named "demo".
 sys_db.create_datatabase("demo");
 
-// Connect to "test" database as root user.
+// Connect to "demo" database as root user.
 auto db = conn.database("demo");
 
 // Create a new collection named "students".
