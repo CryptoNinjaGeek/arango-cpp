@@ -21,8 +21,8 @@ auto main() -> int {
 	db.CreateCollection({"students", .allowConflict=true});
 
 	auto students = db.Collection("students");
-
-	auto result = students.AddHashIndex({.fields= {"name"}, .unique= true});
+	
+	students.AddHashIndex({.fields= {"name"}, .unique= true});
 
 	students.Insert({{"name", "jane5"},
 					 {"age", 39}}, {.overwrite=true});

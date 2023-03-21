@@ -94,19 +94,25 @@ auto Connection::SendRequest(Request request) -> Response {
   }
   session.SetParameters(param);
 
+  auto request_headers = request.headers();
+  cpr::Header headers;
+  StandardHeaders(request_headers);
+  for (auto item : request_headers) {
+	headers[item.first] = item.second;
+  }
+  session.SetHeader(headers);
+
   if (not request.data().empty()) {
 	session.SetBody(cpr::Body{request.data()});
   }
+
 #ifdef __DEBUG__
   std::cout << "Data(" << request.data() << ")" << std::endl;
 #endif
+
   session.SetUrl(url);
   session.SetHttpVersion(cpr::HttpVersion{cpr::HttpVersionCode::VERSION_1_1});
-  session.SetHeader(
-	  cpr::Header{
-		  {"Content-Type", "application/json"}
-	  }
-  );
+
 #ifdef __DEBUG__
   std::cout << session.GetFullRequestUrl() << std::endl;
 #endif
@@ -123,7 +129,7 @@ auto Connection::SendRequest(Request request) -> Response {
 	  break;
   }
 
-#ifdef __DEBUG__X
+#ifdef __DEBUG__
   std::cout << r.status_code << std::endl;
   std::cout << r.text << std::endl;
   std::cout << r.raw_header << std::endl;
@@ -142,6 +148,15 @@ auto Connection::SendRequest(Request request) -> Response {
 		.Body(j)
 		.HttpCode(r.status_code);
   }
+}
+
+auto Connection::StandardHeaders(std::vector<StringPair> &header) -> void {
+  auto driver_version = std::string("0.0.1");
+  auto driver_header = std::string("zutano/") + driver_version;
+
+  header.push_back(StringPair{"Content-Type", "application/json"});
+  header.push_back(StringPair{"charset", "utf-8"});
+  header.push_back(StringPair{"x-arango-driver", driver_header});
 }
 
 auto Connection::Ping() -> int {

@@ -30,6 +30,8 @@ class Connection {
 
   auto SendRequest(Request) -> Response;
 
+  auto StandardHeaders(std::vector<StringPair> &) -> void;
+
  public:
   static auto Create() -> ConnectionPtr;
 

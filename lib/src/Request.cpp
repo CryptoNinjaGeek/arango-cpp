@@ -16,6 +16,7 @@ class RequestPimpl : public PrivateImpl {
   std::string database_name_;
   std::string collection_name_;
   std::vector<StringPair> params_;
+  std::vector<StringPair> headers_;
 
  public:
   static inline auto Pimpl(std::shared_ptr<PrivateImpl> p) {
@@ -54,6 +55,12 @@ auto Request::Collection(std::string name) -> Request {
 auto Request::Parameters(std::vector<StringPair> param) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
   p->params_ = param;
+  return *this;
+}
+
+auto Request::Headers(std::vector<StringPair> headers) -> Request {
+  auto p = RequestPimpl::Pimpl(p_);
+  p->headers_ = headers;
   return *this;
 }
 
@@ -96,6 +103,11 @@ auto Request::data() -> std::string {
 auto Request::parameters() -> std::vector<StringPair> {
   auto p = RequestPimpl::Pimpl(p_);
   return p->params_;
+}
+
+auto Request::headers() -> std::vector<StringPair> {
+  auto p = RequestPimpl::Pimpl(p_);
+  return p->headers_;
 }
 
 } // zutano

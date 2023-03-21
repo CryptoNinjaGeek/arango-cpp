@@ -6,4 +6,4 @@
 #include <zutano/Collection.h>
 #include <zutano/Request.h>
 #include <zutano/Response.h>
-#include <zutano/Index.h>
+#include "zutano/input/IndexInput.h"
