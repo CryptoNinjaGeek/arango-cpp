@@ -100,9 +100,7 @@ auto Connection::SendRequest(Request request) -> Response {
 	  break;
 	case AuthType::NONE: break;
   }
-
-  session.SetSslOptions()
-
+  
   cpr::Parameters param;
   for (auto item : request.parameters()) {
 	param.Add(cpr::Parameter{item.first, item.second});
