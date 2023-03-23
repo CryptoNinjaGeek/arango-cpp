@@ -21,12 +21,15 @@ class Collection {
 
   ~Collection() = default;
 
+  auto Truncate() -> bool;
+  auto Head(nlohmann::json) -> nlohmann::json;
+
   // Document modifications
   auto Insert(nlohmann::json, input::InsertInput = {}) -> nlohmann::json;
   auto Delete(nlohmann::json, input::DeleteInput = {}) -> bool;
   auto Update(nlohmann::json, input::UpdateInput = {}) -> nlohmann::json;
   auto Replace(nlohmann::json, input::ReplaceInput = {}) -> nlohmann::json;
-  auto Get(input::GetInput) -> nlohmann::json;
+  auto Get(nlohmann::json, input::GetInput) -> nlohmann::json;
 
   // Indexes
   auto AddHashIndex(input::IndexCreateInput) -> nlohmann::json;

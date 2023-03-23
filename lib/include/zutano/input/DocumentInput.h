@@ -28,10 +28,6 @@ struct DeleteInput {
 };
 
 struct GetInput {
-  union {
-	std::string _id;
-	std::string _key;
-  };
   std::optional<std::string> rev;
   bool check_rev{true};
   bool allow_dirty_read{false};

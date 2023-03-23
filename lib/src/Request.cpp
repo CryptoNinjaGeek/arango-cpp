@@ -4,7 +4,7 @@
 
 #include <zutano/Request.h>
 #include <zutano/Tools.h>
-#include <iostream>
+#include <string>
 
 namespace zutano {
 
@@ -15,6 +15,7 @@ class RequestPimpl : public PrivateImpl {
   std::string data_;
   std::string database_name_;
   std::string collection_name_;
+  std::string document_handle_;
   std::vector<StringPair> params_;
   std::vector<StringPair> headers_;
 
@@ -43,6 +44,12 @@ auto Request::Method(HttpMethod method) -> Request {
 auto Request::Database(std::string name) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
   p->database_name_ = name;
+  return *this;
+}
+
+auto Request::Handle(std::string name) -> Request {
+  auto p = RequestPimpl::Pimpl(p_);
+  p->document_handle_ = name;
   return *this;
 }
 
@@ -88,6 +95,11 @@ auto Request::database() -> std::string {
 auto Request::collection() -> std::string {
   auto p = RequestPimpl::Pimpl(p_);
   return p->collection_name_;
+}
+
+auto Request::handle() -> std::string {
+  auto p = RequestPimpl::Pimpl(p_);
+  return p->document_handle_;
 }
 
 auto Request::method() -> HttpMethod {

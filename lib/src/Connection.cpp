@@ -17,7 +17,7 @@ namespace zutano {
 
 class ConnectionPimpl : public PrivateImpl {
  public:
-  std::string endpoint_;
+  std::vector<std::string> endpoints_;
   std::string user_name_;
   std::string password_;
   std::string jwt_token_;
@@ -27,6 +27,13 @@ class ConnectionPimpl : public PrivateImpl {
   static inline auto Pimpl(std::shared_ptr<PrivateImpl> p) {
 	return std::dynamic_pointer_cast<ConnectionPimpl>(p);
   }
+
+  auto host() -> std::string {
+	return this->endpoints_.at(last_++%this->endpoints_.size());
+  }
+
+ private:
+  unsigned long last_ = 0;
 };
 
 Connection::Connection() {
@@ -37,12 +44,16 @@ auto Connection::Create() -> ConnectionPtr {
   return ConnectionPtr(new Connection);
 }
 
-auto Connection::Endpoint(std::string endpoint) -> Connection & {
+auto Connection::Host(std::string endpoint) -> Connection & {
   auto p = ConnectionPimpl::Pimpl(p_);
-  auto tmp_endpoint = tools::trim(endpoint);
-  if (tmp_endpoint.length() > 1 && tmp_endpoint.find_last_of('/')==tmp_endpoint.length() - 1)
-	tmp_endpoint = tmp_endpoint.substr(0, tmp_endpoint.length() - 1);
-  p->endpoint_ = tmp_endpoint;
+  p->endpoints_.push_back(tools::remove_last_slash(tools::trim(endpoint)));
+  return *this;
+}
+
+auto Connection::Hosts(std::vector<std::string> endpoints) -> Connection & {
+  auto p = ConnectionPimpl::Pimpl(p_);
+  for (auto host : endpoints)
+	p->endpoints_.push_back(tools::remove_last_slash(tools::trim(host)));
   return *this;
 }
 
@@ -70,13 +81,15 @@ auto Connection::SendRequest(Request request) -> Response {
   if (request.endpoint().empty())
 	throw RequestError(request.endpoint());
   cpr::Session session;
-  std::string url_string = p->endpoint_;
+  std::string url_string = p->host();
   if (not request.database().empty())
 	url_string += "/_db/" + request.database();
   if (not request.endpoint().empty())
 	url_string += "/_api/" + request.endpoint();
   if (not request.collection().empty())
-	url_string += "/" + request.collection();
+	tools::replace(url_string, "{collection}", request.collection());
+  if (not request.handle().empty())
+	tools::replace(url_string, "{handle}", request.handle());
 
   auto url = cpr::Url{url_string};
   switch (p->auth_type_) {
@@ -87,6 +100,8 @@ auto Connection::SendRequest(Request request) -> Response {
 	  break;
 	case AuthType::NONE: break;
   }
+
+  session.SetSslOptions()
 
   cpr::Parameters param;
   for (auto item : request.parameters()) {
@@ -127,15 +142,21 @@ auto Connection::SendRequest(Request request) -> Response {
 	  break;
 	case HttpMethod::DELETE: r = session.Delete();
 	  break;
+	case HttpMethod::PATCH: r = session.Patch();
+	  break;
+	case HttpMethod::HEAD: r = session.Head();
+	  break;
   }
 
 #ifdef __DEBUG__
+//  std::cout << r.raw_header << std::endl;
   std::cout << r.status_code << std::endl;
   std::cout << r.text << std::endl;
-  std::cout << r.raw_header << std::endl;
 #endif
 
-  nlohmann::json j = nlohmann::json::parse(r.text);
+  nlohmann::json j;
+  if (not r.text.empty())
+	j = nlohmann::json::parse(r.text);
 
   if (j.contains("error") && j["error"].get<bool>()) {
 	return Response()

@@ -204,7 +204,7 @@ auto Collection::AddIndex(nlohmann::json data) -> nlohmann::json {
 	  .Database(p->db_.name())
 	  .Parameters({StringPair("collection", p->name_)})
 	  .Endpoint("/index")
-	  .Data(data.dump(2));
+	  .Data(data.dump());
 
   auto response = p->connection_.SendRequest(r);
   if (response.contains({401, 403}))

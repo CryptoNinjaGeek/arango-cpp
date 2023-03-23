@@ -24,6 +24,8 @@ class Request {
 
   auto Data(std::string) -> Request;
 
+  auto Handle(std::string) -> Request;
+
   auto Parameters(std::vector<StringPair>) -> Request;
 
   auto Headers(std::vector<StringPair>) -> Request;
@@ -35,6 +37,8 @@ class Request {
   auto endpoint() -> std::string;
 
   auto method() -> HttpMethod;
+
+  auto handle() -> std::string;
 
   auto data() -> std::string;
 

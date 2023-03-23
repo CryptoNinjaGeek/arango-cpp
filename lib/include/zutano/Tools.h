@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <iostream>
 
 namespace zutano {
 namespace tools {
@@ -24,6 +25,28 @@ inline std::string trim(const std::string &s) {
 inline std::string to_string(bool b) {
   return b ? "true" : "false";
 }
+
+inline bool replace(std::string &str, const std::string &from, const std::string &to) {
+  size_t start_pos = str.find(from);
+  if (start_pos==std::string::npos)
+	return false;
+  str.replace(start_pos, from.length(), to);
+  return true;
+}
+
+inline std::string to_array(nlohmann::json doc) {
+  if (!doc.is_array()) {
+	return std::string("[") + doc.dump() + std::string("]");
+  } else
+	return doc.dump();
+}
+
+inline std::string remove_last_slash(std::string str) {
+  if (str.length() > 1 && str.find_last_of('/')==str.length() - 1)
+	str = str.substr(0, str.length() - 1);
+  return str;
+}
+
 } // tools
 } // zutano
 

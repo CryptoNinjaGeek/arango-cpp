@@ -21,6 +21,25 @@ Collection::Collection(Connection conn, Database db, std::string name) {
   p_ = p;
 }
 
+auto Collection::Head(nlohmann::json doc) -> nlohmann::json {
+  auto p = pimp::CollectionPimpl::Pimpl(p_);
+
+  auto r = Request()
+	  .Method(HttpMethod::HEAD)
+	  .Database(p->db_.name())
+	  .Collection(p->name_)
+	  .Endpoint(std::string("/document/{handle}"))
+	  .Handle(GetHandleFromDocument(doc));
+
+  auto response = p->connection_.SendRequest(r);
+  if (response.error_code()==412)
+	throw AuthenticationError();
+  else if (not response.is_success())
+	throw ServerError(response.error_message(), response.error_code());
+
+  return response.body();
+}
+
 auto Collection::Insert(nlohmann::json doc, input::InsertInput input) -> nlohmann::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
   std::vector<StringPair> params;
@@ -44,8 +63,8 @@ auto Collection::Insert(nlohmann::json doc, input::InsertInput input) -> nlohman
 	  .Database(p->db_.name())
 	  .Collection(p->name_)
 	  .Parameters(params)
-	  .Endpoint("/document")
-	  .Data(doc.dump(2));
+	  .Endpoint("/document/{collection}")
+	  .Data(doc.dump());
 
   auto response = p->connection_.SendRequest(r);
   if (response.contains({401, 403}))
@@ -61,8 +80,6 @@ auto Collection::Delete(nlohmann::json doc, input::DeleteInput input) -> bool {
 
   std::vector<StringPair> params;
 
-  auto handle = GetHandleFromDocument(doc);
-
   params.push_back(StringPair("returnOld", tools::to_string(input.return_old)));
   params.push_back(StringPair("ignoreRevs", tools::to_string(not input.check_rev)));
   params.push_back(StringPair("overwrite", tools::to_string(not input.check_rev)));
@@ -75,8 +92,14 @@ auto Collection::Delete(nlohmann::json doc, input::DeleteInput input) -> bool {
 	  .Method(HttpMethod::DELETE)
 	  .Database(p->db_.name())
 	  .Collection(p->name_)
-	  .Parameters(params)
-	  .Endpoint(std::string("/document'/") + handle);
+	  .Parameters(params);
+
+  if (doc.is_array())
+	r = r.Endpoint(std::string("/document/{collection}"))
+		.Data(doc.dump());
+  else
+	r = r.Endpoint(std::string("/document/{handle}"))
+		.Handle(GetHandleFromDocument(doc));
 
   auto response = p->connection_.SendRequest(r);
   if (response.error_code()==1202 and input.ignore_missing)
@@ -94,8 +117,6 @@ auto Collection::Update(nlohmann::json doc, input::UpdateInput input) -> nlohman
 
   std::vector<StringPair> params;
 
-  auto handle = GetHandleFromDocument(doc);
-
   params.push_back(StringPair("keepNull", tools::to_string(input.keep_none)));
   params.push_back(StringPair("mergeObjects", tools::to_string(input.merge)));
   params.push_back(StringPair("returnNew", tools::to_string(input.return_new)));
@@ -112,7 +133,13 @@ auto Collection::Update(nlohmann::json doc, input::UpdateInput input) -> nlohman
 	  .Database(p->db_.name())
 	  .Collection(p->name_)
 	  .Parameters(params)
-	  .Endpoint(std::string("/document'/") + handle);
+	  .Data(doc.dump());
+
+  if (doc.is_array())
+	r = r.Endpoint(std::string("/document/{collection}/"));
+  else
+	r = r.Endpoint(std::string("/document/{handle}"))
+		.Handle(GetHandleFromDocument(doc));
 
   auto response = p->connection_.SendRequest(r);
   if (response.error_code()==412)
@@ -130,8 +157,6 @@ auto Collection::Replace(nlohmann::json doc, input::ReplaceInput input) -> nlohm
 
   std::vector<StringPair> params;
 
-  auto handle = GetHandleFromDocument(doc);
-
   params.push_back(StringPair("returnNew", tools::to_string(input.return_new)));
   params.push_back(StringPair("returnOld", tools::to_string(input.return_old)));
   params.push_back(StringPair("ignoreRevs", tools::to_string(not input.check_rev)));
@@ -146,7 +171,13 @@ auto Collection::Replace(nlohmann::json doc, input::ReplaceInput input) -> nlohm
 	  .Database(p->db_.name())
 	  .Collection(p->name_)
 	  .Parameters(params)
-	  .Endpoint(std::string("/document'/") + handle);
+	  .Data(doc.dump());
+
+  if (doc.is_array())
+	r = r.Endpoint(std::string("/document/{collection}/"));
+  else
+	r = r.Endpoint(std::string("/document/{handle}"))
+		.Handle(GetHandleFromDocument(doc));
 
   auto response = p->connection_.SendRequest(r);
   if (response.error_code()==412)
@@ -159,7 +190,7 @@ auto Collection::Replace(nlohmann::json doc, input::ReplaceInput input) -> nlohm
   return response.body();
 }
 
-auto Collection::Get(input::GetInput input) -> nlohmann::json {
+auto Collection::Get(nlohmann::json doc, input::GetInput input) -> nlohmann::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
   std::vector<StringPair> headers;
@@ -170,8 +201,13 @@ auto Collection::Get(input::GetInput input) -> nlohmann::json {
 	  .Method(HttpMethod::GET)
 	  .Headers(headers)
 	  .Database(p->db_.name())
-	  .Collection(p->name_)
-	  .Endpoint(std::string("/document/") + input._id);
+	  .Collection(p->name_);
+
+  if (doc.is_array())
+	r = r.Endpoint(std::string("/document/{collection}/"));
+  else
+	r = r.Endpoint(std::string("/document/{handle}"))
+		.Handle(GetHandleFromDocument(doc));
 
   auto response = p->connection_.SendRequest(r);
   if (response.error_code()==1202)
@@ -190,6 +226,22 @@ auto Collection::GetHandleFromDocument(nlohmann::json doc) -> std::string {
   else if (doc.contains("_key"))
 	return doc["_key"].get<std::string>();
   return {};
+}
+
+auto Collection::Truncate() -> bool {
+  auto p = pimp::CollectionPimpl::Pimpl(p_);
+
+  auto r = Request()
+	  .Method(HttpMethod::PUT)
+	  .Database(p->db_.name())
+	  .Collection(p->name_)
+	  .Endpoint("/collection/{collection}/truncate");
+
+  auto response = p->connection_.SendRequest(r);
+  if (not response.is_success())
+	throw ServerError(response.error_message(), response.error_code());
+
+  return true;
 }
 
 } // zutano

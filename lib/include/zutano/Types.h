@@ -15,7 +15,8 @@ enum class HttpMethod {
   POST,
   PUT,
   DELETE,
-  PATCH
+  PATCH,
+  HEAD
 };
 
 typedef std::pair<std::string, std::string> StringPair;
