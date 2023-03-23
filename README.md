@@ -16,8 +16,8 @@ Here is a simple usage example:
 ```cpp
 // Initialize the client for ArangoDB.
 auto conn = Connection()
-.Endpoint("http://localhost:8529")
-.auth("root", "passwd");
+	.Host("http://localhost:8529")
+	.auth("root", "passwd");
 
 // Connect to "_system" Database as root user.
 auto sys_db = conn.Database("_system");
@@ -36,35 +36,20 @@ students.AddHashIndex({ .fields= { "name" }, .unique= true });
 
 // Insert new documents into the Collection.
 students.Insert({
-{
-"name", "jane"
-},
-{
-"age", 39
-}
+  {"name", "jane"},{"age", 39}
 });
 students.Insert({
-{
-"name", "josh"
-},
-{
-"age", 18
-}
+  {"name", "josh"},{"age", 18}
 });
 students.Insert({
-{
-"name", "judy"
-},
-{
-"age", 21
-}
+  {"name", "judy"},{"age", 21}
 });
 
 // Execute an AQL query and iterate through the result cursor.
 auto cursor = db.Execute("FOR doc IN students RETURN doc");
 
 for (auto doc: cursor) {
-doc.dump();
+  doc.dump();
 }
 ```
 
