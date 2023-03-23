@@ -21,7 +21,7 @@ add_library(zutano SHARED
         src/Collection.cpp
         src/Request.cpp
         src/Response.cpp
-        )
+        src/Index.cpp include/zutano/input/DocumentInput.h)
 
 target_link_libraries(zutano PRIVATE
         cpr::cpr

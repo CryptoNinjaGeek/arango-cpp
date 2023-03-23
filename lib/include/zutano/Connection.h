@@ -18,7 +18,9 @@ class Connection {
 
   ~Connection() = default;
 
-  auto Endpoint(std::string) -> Connection &;
+  auto Host(std::string) -> Connection &;
+
+  auto Hosts(std::vector<std::string>) -> Connection &;
 
   auto Auth(std::string, std::string) -> Connection &;
 
@@ -29,6 +31,8 @@ class Connection {
   auto Ping() -> int;
 
   auto SendRequest(Request) -> Response;
+
+  auto StandardHeaders(std::vector<StringPair> &) -> void;
 
  public:
   static auto Create() -> ConnectionPtr;

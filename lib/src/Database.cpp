@@ -68,7 +68,7 @@ auto Database::CreateDatatabase(DatabaseCreateInput input) -> Database {
 	  .Method(HttpMethod::POST)
 	  .Database(p->name_)
 	  .Endpoint("/database")
-	  .Data(data.dump(2));
+	  .Data(data.dump());
 
   auto response = p->connection_.SendRequest(r);
   if (response.contains({401, 403}))
@@ -134,7 +134,7 @@ auto Database::CreateCollection(CollectionCreateInput input) -> zutano::Collecti
 	  .Database(p->name_)
 	  .Endpoint("/collection")
 	  .Parameters(params)
-	  .Data(data.dump(2));
+	  .Data(data.dump());
 
   auto response = p->connection_.SendRequest(r);
   if (response.contains({401, 403}))

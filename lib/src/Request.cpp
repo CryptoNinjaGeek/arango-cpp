@@ -4,7 +4,7 @@
 
 #include <zutano/Request.h>
 #include <zutano/Tools.h>
-#include <iostream>
+#include <string>
 
 namespace zutano {
 
@@ -15,7 +15,9 @@ class RequestPimpl : public PrivateImpl {
   std::string data_;
   std::string database_name_;
   std::string collection_name_;
+  std::string document_handle_;
   std::vector<StringPair> params_;
+  std::vector<StringPair> headers_;
 
  public:
   static inline auto Pimpl(std::shared_ptr<PrivateImpl> p) {
@@ -45,6 +47,12 @@ auto Request::Database(std::string name) -> Request {
   return *this;
 }
 
+auto Request::Handle(std::string name) -> Request {
+  auto p = RequestPimpl::Pimpl(p_);
+  p->document_handle_ = name;
+  return *this;
+}
+
 auto Request::Collection(std::string name) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
   p->collection_name_ = name;
@@ -54,6 +62,12 @@ auto Request::Collection(std::string name) -> Request {
 auto Request::Parameters(std::vector<StringPair> param) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
   p->params_ = param;
+  return *this;
+}
+
+auto Request::Headers(std::vector<StringPair> headers) -> Request {
+  auto p = RequestPimpl::Pimpl(p_);
+  p->headers_ = headers;
   return *this;
 }
 
@@ -83,6 +97,11 @@ auto Request::collection() -> std::string {
   return p->collection_name_;
 }
 
+auto Request::handle() -> std::string {
+  auto p = RequestPimpl::Pimpl(p_);
+  return p->document_handle_;
+}
+
 auto Request::method() -> HttpMethod {
   auto p = RequestPimpl::Pimpl(p_);
   return p->method_;
@@ -96,6 +115,11 @@ auto Request::data() -> std::string {
 auto Request::parameters() -> std::vector<StringPair> {
   auto p = RequestPimpl::Pimpl(p_);
   return p->params_;
+}
+
+auto Request::headers() -> std::vector<StringPair> {
+  auto p = RequestPimpl::Pimpl(p_);
+  return p->headers_;
 }
 
 } // zutano

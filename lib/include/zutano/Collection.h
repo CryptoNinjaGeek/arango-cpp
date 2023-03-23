@@ -2,22 +2,12 @@
 
 #include <string>
 #include <zutano/PrivateImpl.h>
-#include <zutano/Index.h>
+#include <zutano/input/IndexInput.h>
+#include <zutano/input/DocumentInput.h>
 
 #include <nlohmann/json.hpp>
 
 namespace zutano {
-
-struct InsertInput {
-  bool return_new{false};
-  std::optional<bool> sync;
-  bool silent{false};
-  bool overwrite{false};
-  bool return_old{false};
-  std::optional<std::string> overwrite_mode;
-  std::optional<bool> keep_none;
-  std::optional<bool> merge;
-};
 
 class Collection;
 class Connection;
@@ -31,12 +21,30 @@ class Collection {
 
   ~Collection() = default;
 
-  auto Insert(nlohmann::json, InsertInput = {}) -> nlohmann::json;
+  auto Truncate() -> bool;
+  auto Head(nlohmann::json) -> nlohmann::json;
 
-  auto AddHashIndex(HashIndexCreateInput) -> nlohmann::json;
+  // Document modifications
+  auto Insert(nlohmann::json, input::InsertInput = {}) -> nlohmann::json;
+  auto Delete(nlohmann::json, input::DeleteInput = {}) -> bool;
+  auto Update(nlohmann::json, input::UpdateInput = {}) -> nlohmann::json;
+  auto Replace(nlohmann::json, input::ReplaceInput = {}) -> nlohmann::json;
+  auto Get(nlohmann::json, input::GetInput) -> nlohmann::json;
+
+  // Indexes
+  auto AddHashIndex(input::IndexCreateInput) -> nlohmann::json;
+  auto AddSkiplistIndex(input::IndexCreateInput) -> nlohmann::json;
+  auto AddGeoIndex(input::GeoIndexCreateInput) -> nlohmann::json;
+  auto AddFulltextIndex(input::FulltextIndexCreateInput) -> nlohmann::json;
+  auto AddPersistantIndex(input::PersistantIndexCreateInput) -> nlohmann::json;
+  auto AddTTLIndex(input::TTLIndexCreateInput) -> nlohmann::json;
+  auto AddInvertedIndex(input::InvertedIndexCreateInput) -> nlohmann::json;
+  auto DeleteIndex(std::string, bool ignore_missing = false) -> bool;
+  auto LoadIndexesIntoMemory() -> bool;
 
  protected:
   auto AddIndex(nlohmann::json) -> nlohmann::json;
+  auto GetHandleFromDocument(nlohmann::json) -> std::string;
 
  private:
   PrivateImplPtr p_;
