@@ -100,7 +100,7 @@ auto Connection::SendRequest(Request request) -> Response {
 	  break;
 	case AuthType::NONE: break;
   }
-  
+
   cpr::Parameters param;
   for (auto item : request.parameters()) {
 	param.Add(cpr::Parameter{item.first, item.second});
@@ -152,16 +152,16 @@ auto Connection::SendRequest(Request request) -> Response {
   std::cout << r.text << std::endl;
 #endif
 
-  nlohmann::json j;
+  jsoncons::json j;
   if (not r.text.empty())
-	j = nlohmann::json::parse(r.text);
+	j = jsoncons::json::parse(r.text);
 
-  if (j.contains("error") && j["error"].get<bool>()) {
+  if (j.contains("error") && j["error"].as<bool>()) {
 	return Response()
 		.Body(j)
 		.HttpCode(r.status_code)
-		.ErrorCode(j["errorNum"].get<int>())
-		.Message(j["errorMessage"].get<std::string>());
+		.ErrorCode(j["errorNum"].as<int>())
+		.Message(j["errorMessage"].as<std::string>());
   } else {
 	return Response()
 		.Body(j)

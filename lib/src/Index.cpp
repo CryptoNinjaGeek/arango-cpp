@@ -11,10 +11,10 @@
 
 namespace zutano {
 
-auto Collection::AddHashIndex(input::IndexCreateInput input) -> nlohmann::json {
+auto Collection::AddHashIndex(input::IndexCreateInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
-  nlohmann::json data = {
+  jsoncons::json data = tools::to_json{
 	  {"type", "hash"},
 	  {"fields", input.fields},
   };
@@ -33,10 +33,10 @@ auto Collection::AddHashIndex(input::IndexCreateInput input) -> nlohmann::json {
   return AddIndex(data);
 }
 
-auto Collection::AddSkiplistIndex(input::IndexCreateInput input) -> nlohmann::json {
+auto Collection::AddSkiplistIndex(input::IndexCreateInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
-  nlohmann::json data = {
+  jsoncons::json data = tools::to_json{
 	  {"type", "skiplist"},
 	  {"fields", input.fields},
   };
@@ -55,10 +55,10 @@ auto Collection::AddSkiplistIndex(input::IndexCreateInput input) -> nlohmann::js
   return AddIndex(data);
 }
 
-auto Collection::AddGeoIndex(input::GeoIndexCreateInput input) -> nlohmann::json {
+auto Collection::AddGeoIndex(input::GeoIndexCreateInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
-  nlohmann::json data = {
+  jsoncons::json data = tools::to_json{
 	  {"type", "geo"},
 	  {"fields", input.fields},
   };
@@ -75,10 +75,10 @@ auto Collection::AddGeoIndex(input::GeoIndexCreateInput input) -> nlohmann::json
   return AddIndex(data);
 }
 
-auto Collection::AddFulltextIndex(input::FulltextIndexCreateInput input) -> nlohmann::json {
+auto Collection::AddFulltextIndex(input::FulltextIndexCreateInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
-  nlohmann::json data = {
+  jsoncons::json data = tools::to_json{
 	  {"type", "fulltext"},
 	  {"fields", input.fields},
   };
@@ -93,10 +93,10 @@ auto Collection::AddFulltextIndex(input::FulltextIndexCreateInput input) -> nloh
   return AddIndex(data);
 }
 
-auto Collection::AddPersistantIndex(input::PersistantIndexCreateInput input) -> nlohmann::json {
+auto Collection::AddPersistantIndex(input::PersistantIndexCreateInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
-  nlohmann::json data = {
+  jsoncons::json data = tools::to_json{
 	  {"type", "persistent"},
 	  {"fields", input.fields},
   };
@@ -117,10 +117,10 @@ auto Collection::AddPersistantIndex(input::PersistantIndexCreateInput input) -> 
   return AddIndex(data);
 }
 
-auto Collection::AddTTLIndex(input::TTLIndexCreateInput input) -> nlohmann::json {
+auto Collection::AddTTLIndex(input::TTLIndexCreateInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
-  nlohmann::json data = {
+  jsoncons::json data = tools::to_json{
 	  {"type", "ttl"},
 	  {"fields", input.fields},
 	  {"expireAfter", input.expiry_time},
@@ -134,10 +134,10 @@ auto Collection::AddTTLIndex(input::TTLIndexCreateInput input) -> nlohmann::json
   return AddIndex(data);
 }
 
-auto Collection::AddInvertedIndex(input::InvertedIndexCreateInput input) -> nlohmann::json {
+auto Collection::AddInvertedIndex(input::InvertedIndexCreateInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
-  nlohmann::json data = {
+  jsoncons::json data = tools::to_json{
 	  {"type", "inverted"},
 	  {"fields", input.fields},
   };
@@ -197,14 +197,14 @@ auto Collection::LoadIndexesIntoMemory() -> bool {
   return true;
 }
 
-auto Collection::AddIndex(nlohmann::json data) -> nlohmann::json {
+auto Collection::AddIndex(jsoncons::json data) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
   auto r = Request()
 	  .Method(HttpMethod::POST)
 	  .Database(p->db_.name())
 	  .Parameters({StringPair("collection", p->name_)})
 	  .Endpoint("/index")
-	  .Data(data.dump());
+	  .Data(data.to_string());
 
   auto response = p->connection_.SendRequest(r);
   if (response.contains({401, 403}))

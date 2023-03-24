@@ -5,7 +5,7 @@
 #include <zutano/input/IndexInput.h>
 #include <zutano/input/DocumentInput.h>
 
-#include <nlohmann/json.hpp>
+#include <jsoncons/json.hpp>
 
 namespace zutano {
 
@@ -22,29 +22,29 @@ class Collection {
   ~Collection() = default;
 
   auto Truncate() -> bool;
-  auto Head(nlohmann::json) -> nlohmann::json;
+  auto Head(jsoncons::json) -> jsoncons::json;
 
   // Document modifications
-  auto Insert(nlohmann::json, input::InsertInput = {}) -> nlohmann::json;
-  auto Delete(nlohmann::json, input::DeleteInput = {}) -> bool;
-  auto Update(nlohmann::json, input::UpdateInput = {}) -> nlohmann::json;
-  auto Replace(nlohmann::json, input::ReplaceInput = {}) -> nlohmann::json;
-  auto Get(nlohmann::json, input::GetInput) -> nlohmann::json;
+  auto Insert(jsoncons::json, input::InsertInput = {}) -> jsoncons::json;
+  auto Delete(jsoncons::json, input::DeleteInput = {}) -> bool;
+  auto Update(jsoncons::json, input::UpdateInput = {}) -> jsoncons::json;
+  auto Replace(jsoncons::json, input::ReplaceInput = {}) -> jsoncons::json;
+  auto Get(jsoncons::json, input::GetInput) -> jsoncons::json;
 
   // Indexes
-  auto AddHashIndex(input::IndexCreateInput) -> nlohmann::json;
-  auto AddSkiplistIndex(input::IndexCreateInput) -> nlohmann::json;
-  auto AddGeoIndex(input::GeoIndexCreateInput) -> nlohmann::json;
-  auto AddFulltextIndex(input::FulltextIndexCreateInput) -> nlohmann::json;
-  auto AddPersistantIndex(input::PersistantIndexCreateInput) -> nlohmann::json;
-  auto AddTTLIndex(input::TTLIndexCreateInput) -> nlohmann::json;
-  auto AddInvertedIndex(input::InvertedIndexCreateInput) -> nlohmann::json;
+  auto AddHashIndex(input::IndexCreateInput) -> jsoncons::json;
+  auto AddSkiplistIndex(input::IndexCreateInput) -> jsoncons::json;
+  auto AddGeoIndex(input::GeoIndexCreateInput) -> jsoncons::json;
+  auto AddFulltextIndex(input::FulltextIndexCreateInput) -> jsoncons::json;
+  auto AddPersistantIndex(input::PersistantIndexCreateInput) -> jsoncons::json;
+  auto AddTTLIndex(input::TTLIndexCreateInput) -> jsoncons::json;
+  auto AddInvertedIndex(input::InvertedIndexCreateInput) -> jsoncons::json;
   auto DeleteIndex(std::string, bool ignore_missing = false) -> bool;
   auto LoadIndexesIntoMemory() -> bool;
 
  protected:
-  auto AddIndex(nlohmann::json) -> nlohmann::json;
-  auto GetHandleFromDocument(nlohmann::json) -> std::string;
+  auto AddIndex(jsoncons::json) -> jsoncons::json;
+  auto GetHandleFromDocument(jsoncons::json) -> std::string;
 
  private:
   PrivateImplPtr p_;

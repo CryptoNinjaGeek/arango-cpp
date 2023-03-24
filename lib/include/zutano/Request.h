@@ -4,7 +4,7 @@
 #include <zutano/PrivateImpl.h>
 #include <zutano/Types.h>
 
-#include <nlohmann/json.hpp>
+#include <jsoncons/json.hpp>
 
 namespace zutano {
 

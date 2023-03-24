@@ -21,7 +21,7 @@ Collection::Collection(Connection conn, Database db, std::string name) {
   p_ = p;
 }
 
-auto Collection::Head(nlohmann::json doc) -> nlohmann::json {
+auto Collection::Head(jsoncons::json doc) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
   auto r = Request()
@@ -40,7 +40,7 @@ auto Collection::Head(nlohmann::json doc) -> nlohmann::json {
   return response.body();
 }
 
-auto Collection::Insert(nlohmann::json doc, input::InsertInput input) -> nlohmann::json {
+auto Collection::Insert(jsoncons::json doc, input::InsertInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
   std::vector<StringPair> params;
 
@@ -64,7 +64,7 @@ auto Collection::Insert(nlohmann::json doc, input::InsertInput input) -> nlohman
 	  .Collection(p->name_)
 	  .Parameters(params)
 	  .Endpoint("/document/{collection}")
-	  .Data(doc.dump());
+	  .Data(doc.to_string());
 
   auto response = p->connection_.SendRequest(r);
   if (response.contains({401, 403}))
@@ -75,7 +75,7 @@ auto Collection::Insert(nlohmann::json doc, input::InsertInput input) -> nlohman
   return response.body();
 }
 
-auto Collection::Delete(nlohmann::json doc, input::DeleteInput input) -> bool {
+auto Collection::Delete(jsoncons::json doc, input::DeleteInput input) -> bool {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
   std::vector<StringPair> params;
@@ -96,7 +96,7 @@ auto Collection::Delete(nlohmann::json doc, input::DeleteInput input) -> bool {
 
   if (doc.is_array())
 	r = r.Endpoint(std::string("/document/{collection}"))
-		.Data(doc.dump());
+		.Data(doc.to_string());
   else
 	r = r.Endpoint(std::string("/document/{handle}"))
 		.Handle(GetHandleFromDocument(doc));
@@ -112,7 +112,7 @@ auto Collection::Delete(nlohmann::json doc, input::DeleteInput input) -> bool {
   return true;
 }
 
-auto Collection::Update(nlohmann::json doc, input::UpdateInput input) -> nlohmann::json {
+auto Collection::Update(jsoncons::json doc, input::UpdateInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
   std::vector<StringPair> params;
@@ -133,7 +133,7 @@ auto Collection::Update(nlohmann::json doc, input::UpdateInput input) -> nlohman
 	  .Database(p->db_.name())
 	  .Collection(p->name_)
 	  .Parameters(params)
-	  .Data(doc.dump());
+	  .Data(doc.to_string());
 
   if (doc.is_array())
 	r = r.Endpoint(std::string("/document/{collection}/"));
@@ -152,7 +152,7 @@ auto Collection::Update(nlohmann::json doc, input::UpdateInput input) -> nlohman
   return response.body();
 }
 
-auto Collection::Replace(nlohmann::json doc, input::ReplaceInput input) -> nlohmann::json {
+auto Collection::Replace(jsoncons::json doc, input::ReplaceInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
   std::vector<StringPair> params;
@@ -171,7 +171,7 @@ auto Collection::Replace(nlohmann::json doc, input::ReplaceInput input) -> nlohm
 	  .Database(p->db_.name())
 	  .Collection(p->name_)
 	  .Parameters(params)
-	  .Data(doc.dump());
+	  .Data(doc.to_string());
 
   if (doc.is_array())
 	r = r.Endpoint(std::string("/document/{collection}/"));
@@ -190,7 +190,7 @@ auto Collection::Replace(nlohmann::json doc, input::ReplaceInput input) -> nlohm
   return response.body();
 }
 
-auto Collection::Get(nlohmann::json doc, input::GetInput input) -> nlohmann::json {
+auto Collection::Get(jsoncons::json doc, input::GetInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::Pimpl(p_);
 
   std::vector<StringPair> headers;
@@ -220,11 +220,11 @@ auto Collection::Get(nlohmann::json doc, input::GetInput input) -> nlohmann::jso
   return response.body();
 }
 
-auto Collection::GetHandleFromDocument(nlohmann::json doc) -> std::string {
+auto Collection::GetHandleFromDocument(jsoncons::json doc) -> std::string {
   if (doc.contains("_id"))
-	return doc["_id"].get<std::string>();
+	return doc["_id"].as<std::string>();
   else if (doc.contains("_key"))
-	return doc["_key"].get<std::string>();
+	return doc["_key"].as<std::string>();
   return {};
 }
 
