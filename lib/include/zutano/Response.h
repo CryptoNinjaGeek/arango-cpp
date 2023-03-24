@@ -5,7 +5,7 @@
 #include <zutano/Types.h>
 
 #include <vector>
-#include <nlohmann/json.hpp>
+#include <jsoncons/json.hpp>
 
 namespace zutano {
 
@@ -19,7 +19,7 @@ class Response {
 
   auto error_code() -> int;
 
-  auto body() -> nlohmann::json;
+  auto body() -> jsoncons::json;
 
   auto error_message() -> std::string;
 
@@ -27,7 +27,7 @@ class Response {
 
   auto contains(std::vector<int>) -> bool;
 
-  auto Body(nlohmann::json) -> Response;
+  auto Body(jsoncons::json) -> Response;
 
   auto HttpCode(int) -> Response;
 

@@ -34,11 +34,11 @@ inline bool replace(std::string &str, const std::string &from, const std::string
   return true;
 }
 
-inline std::string to_array(nlohmann::json doc) {
+inline std::string to_array(jsoncons::json doc) {
   if (!doc.is_array()) {
-	return std::string("[") + doc.dump() + std::string("]");
+	return std::string("[") + doc.to_string() + std::string("]");
   } else
-	return doc.dump();
+	return doc.to_string();
 }
 
 inline std::string remove_last_slash(std::string str) {
@@ -47,6 +47,8 @@ inline std::string remove_last_slash(std::string str) {
   return str;
 }
 
+typedef std::map<std::string, std::variant<std::string, bool, int, char, double, long, std::vector<std::string>>>
+	to_json;
 } // tools
 } // zutano
 

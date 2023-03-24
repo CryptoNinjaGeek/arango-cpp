@@ -14,7 +14,7 @@ class ResponsePimpl : public PrivateImpl {
   int http_code_{0};
   int error_code_{0};
   std::string error_message_;
-  nlohmann::json body_;
+  jsoncons::json body_;
 
  public:
   static inline auto Pimpl(std::shared_ptr<PrivateImpl> p) {
@@ -31,7 +31,7 @@ auto Response::http_code() -> int {
   return p->http_code_;
 }
 
-auto Response::body() -> nlohmann::json {
+auto Response::body() -> jsoncons::json {
   auto p = ResponsePimpl::Pimpl(p_);
   return p->body_;
 }
@@ -68,7 +68,7 @@ auto Response::ErrorCode(int code) -> Response {
   return *this;
 }
 
-auto Response::Body(nlohmann::json body) -> Response {
+auto Response::Body(jsoncons::json body) -> Response {
   auto p = ResponsePimpl::Pimpl(p_);
   p->body_ = body;
   return *this;

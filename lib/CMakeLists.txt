@@ -11,6 +11,14 @@ FetchContent_Declare(
         GIT_TAG v3.11.2
 )
 
+FetchContent_Declare(
+        jsoncons
+        GIT_REPOSITORY https://github.com/danielaparker/jsoncons.git
+        GIT_TAG v0.170.0
+)
+
+
+FetchContent_MakeAvailable(jsoncons)
 FetchContent_MakeAvailable(json)
 FetchContent_MakeAvailable(cpr)
 
@@ -28,7 +36,7 @@ target_link_libraries(zutano PRIVATE
         )
 
 target_link_libraries(zutano PUBLIC
-        nlohmann_json::nlohmann_json
+        jsoncons
         )
 
 target_include_directories(zutano PUBLIC

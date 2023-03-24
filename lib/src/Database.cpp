@@ -5,10 +5,15 @@
 #include <zutano/Database.h>
 #include <zutano/Connection.h>
 #include <zutano/Exceptions.h>
+#include <zutano/Tools.h>
 
-#include <nlohmann/json.hpp>
+#include <jsoncons/json.hpp>
 
 #include <iostream>
+
+using namespace jsoncons;
+using namespace jsoncons::literals;
+using namespace zutano::tools;
 
 namespace zutano {
 
@@ -36,11 +41,11 @@ auto Database::CreateDatatabase(DatabaseCreateInput input) -> Database {
   if (input.name.empty())
 	throw ClientError("CreateDatatabase => database name cannot be empty");
 
-  nlohmann::json data = {
+  jsoncons::json data = to_json{
 	  {"name", input.name}
   };
 
-  nlohmann::json options;
+  jsoncons::json options;
 
   if (input.replication_factor)
 	options["replicationFactor"] = input.replication_factor.value();
@@ -52,14 +57,13 @@ auto Database::CreateDatatabase(DatabaseCreateInput input) -> Database {
   if (options.size())
 	data["options"] = options;
 
-  nlohmann::json users;
+  jsoncons::json users(jsoncons::json_array_arg);
   for (auto user : input.users) {
-	users.push_back({
-						{"username", user.username},
-						{"passwd", user.password},
-						{"active", user.active},
-						{"extra", user.extra},
-					});
+	users.push_back(to_json{
+		{"username", user.username},
+		{"passwd", user.password},
+		{"active", user.active},
+	});
   }
   if (not users.empty())
 	data["users"] = users;
@@ -68,7 +72,7 @@ auto Database::CreateDatatabase(DatabaseCreateInput input) -> Database {
 	  .Method(HttpMethod::POST)
 	  .Database(p->name_)
 	  .Endpoint("/database")
-	  .Data(data.dump());
+	  .Data(data.to_string());
 
   auto response = p->connection_.SendRequest(r);
   if (response.contains({401, 403}))
@@ -85,14 +89,14 @@ auto Database::CreateCollection(CollectionCreateInput input) -> zutano::Collecti
   if (input.name.empty())
 	throw ClientError("CreateCollection => collection name cannot be empty");
 
-  nlohmann::json data = {
+  jsoncons::json data = to_json{
 	  {"name", input.name},
 	  {"waitForSync", input.sync},
 	  {"isSystem", input.system},
 	  {"type", input.edge ? 3 : 2},
   };
 
-  nlohmann::json key_options = {
+  jsoncons::json key_options = to_json{
 	  {"type", input.key_generator},
 	  {"allowUserKeys", input.user_keys}
   };
@@ -134,7 +138,7 @@ auto Database::CreateCollection(CollectionCreateInput input) -> zutano::Collecti
 	  .Database(p->name_)
 	  .Endpoint("/collection")
 	  .Parameters(params)
-	  .Data(data.dump());
+	  .Data(data.to_string());
 
   auto response = p->connection_.SendRequest(r);
   if (response.contains({401, 403}))
@@ -150,8 +154,8 @@ auto Database::Collection(std::string name) -> zutano::Collection {
   return zutano::Collection(p->connection_, *this, name);
 }
 
-auto Database::Execute(std::string) -> nlohmann::json {
-  nlohmann::json j;
+auto Database::Execute(std::string) -> jsoncons::json {
+  jsoncons::json j;
   return j;
 }
 

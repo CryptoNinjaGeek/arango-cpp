@@ -4,7 +4,7 @@
 #include <vector>
 #include <zutano/PrivateImpl.h>
 #include <zutano/Collection.h>
-#include <nlohmann/json.hpp>
+#include <jsoncons/json.hpp>
 
 namespace zutano {
 
@@ -12,7 +12,7 @@ struct UserInput {
   std::string username;
   std::string password;
   bool active{true};
-  nlohmann::json extra;
+  jsoncons::json extra;
 };
 
 struct DatabaseCreateInput {
@@ -42,8 +42,8 @@ struct CollectionCreateInput {
   std::optional<std::string> sharding_strategy;
   std::optional<std::string> smart_join_attribute;
   std::optional<int> write_concern;
-  std::optional<nlohmann::json> schema;
-  std::optional<nlohmann::json> computedValues;
+  std::optional<jsoncons::json> schema;
+  std::optional<jsoncons::json> computedValues;
   bool allowConflict{true};
 };
 
@@ -61,7 +61,7 @@ class Database {
 
   auto Collection(std::string) -> Collection;
 
-  auto Execute(std::string) -> nlohmann::json;
+  auto Execute(std::string) -> jsoncons::json;
 
   auto name() -> std::string;
 
