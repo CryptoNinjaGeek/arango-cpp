@@ -5,6 +5,7 @@
 #include <zutano/Request.h>
 #include <zutano/Tools.h>
 #include <string>
+#include <utility>
 
 namespace zutano {
 
@@ -20,8 +21,8 @@ class RequestPimpl : public PrivateImpl {
   std::vector<StringPair> headers_;
 
  public:
-  static inline auto Pimpl(std::shared_ptr<PrivateImpl> p) {
-	return std::dynamic_pointer_cast<RequestPimpl>(p);
+  static inline auto Pimpl(const std::shared_ptr<PrivateImpl> &p) {
+    return std::dynamic_pointer_cast<RequestPimpl>(p);
   }
 };
 
@@ -31,7 +32,7 @@ Request::Request() {
 
 auto Request::Data(std::string data) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
-  p->data_ = data;
+  p->data_ = std::move(data);
   return *this;
 }
 
@@ -43,40 +44,40 @@ auto Request::Method(HttpMethod method) -> Request {
 
 auto Request::Database(std::string name) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
-  p->database_name_ = name;
+  p->database_name_ = std::move(name);
   return *this;
 }
 
 auto Request::Handle(std::string name) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
-  p->document_handle_ = name;
+  p->document_handle_ = std::move(name);
   return *this;
 }
 
 auto Request::Collection(std::string name) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
-  p->collection_name_ = name;
+  p->collection_name_ = std::move(name);
   return *this;
 }
 
 auto Request::Parameters(std::vector<StringPair> param) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
-  p->params_ = param;
+  p->params_ = std::move(param);
   return *this;
 }
 
 auto Request::Headers(std::vector<StringPair> headers) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
-  p->headers_ = headers;
+  p->headers_ = std::move(headers);
   return *this;
 }
 
-auto Request::Endpoint(std::string endpoint) -> Request {
+auto Request::Endpoint(const std::string &endpoint) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
   auto tmp_endpoint = tools::trim(endpoint);
 
-  if (tmp_endpoint.length() > 1 && tmp_endpoint.find_first_of('/')==0)
-	tmp_endpoint = tmp_endpoint.substr(1, tmp_endpoint.length() - 1);
+  if (tmp_endpoint.length() > 1 && tmp_endpoint.find_first_of('/') == 0)
+    tmp_endpoint = tmp_endpoint.substr(1, tmp_endpoint.length() - 1);
 
   p->endpoint_ = tmp_endpoint;
   return *this;

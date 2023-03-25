@@ -20,7 +20,7 @@ class Request {
 
   auto Collection(std::string endpoint) -> Request;
 
-  auto Endpoint(std::string endpoint) -> Request;
+  auto Endpoint(const std::string &endpoint) -> Request;
 
   auto Data(std::string) -> Request;
 
@@ -48,8 +48,6 @@ class Request {
  private:
   PrivateImplPtr p_;
 };
-
-typedef std::shared_ptr<Request> RequestPtr;
 
 } // zutano
 

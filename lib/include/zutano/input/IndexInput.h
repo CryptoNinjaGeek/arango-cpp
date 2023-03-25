@@ -4,8 +4,7 @@
 #include <vector>
 #include <optional>
 
-namespace zutano {
-namespace input {
+namespace zutano::input {
 
 struct IndexCreateInput {
   std::vector<std::string> fields;
@@ -31,7 +30,7 @@ struct FulltextIndexCreateInput {
   std::optional<int> min_length;
 };
 
-struct PersistantIndexCreateInput {
+struct PersistentIndexCreateInput {
   std::vector<std::string> fields;
   std::optional<std::string> name;
   std::optional<bool> in_background;
@@ -62,5 +61,4 @@ struct InvertedIndexCreateInput {
   std::optional<bool> searchField;
 };
 
-} // input
 } // zutano
