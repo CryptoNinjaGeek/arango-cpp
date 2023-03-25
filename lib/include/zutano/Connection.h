@@ -18,9 +18,9 @@ class Connection {
 
   ~Connection() = default;
 
-  auto Host(std::string) -> Connection &;
+  auto Host(const std::string &) -> Connection &;
 
-  auto Hosts(std::vector<std::string>) -> Connection &;
+  auto Hosts(const std::vector<std::string> &) -> Connection &;
 
   auto Auth(std::string, std::string) -> Connection &;
 
@@ -28,11 +28,11 @@ class Connection {
 
   auto Database(std::string) -> Database;
 
-  auto Ping() -> int;
+  auto Ping() -> long;
 
   auto SendRequest(Request) -> Response;
 
-  auto StandardHeaders(std::vector<StringPair> &) -> void;
+  static auto StandardHeaders(std::vector<StringPair> &) -> void;
 
  public:
   static auto Create() -> ConnectionPtr;

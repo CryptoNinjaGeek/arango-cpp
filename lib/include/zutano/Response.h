@@ -15,7 +15,7 @@ class Response {
 
   ~Response() = default;
 
-  auto http_code() -> int;
+  auto http_code() -> long;
 
   auto error_code() -> int;
 
@@ -29,7 +29,7 @@ class Response {
 
   auto Body(jsoncons::json) -> Response;
 
-  auto HttpCode(int) -> Response;
+  auto HttpCode(long) -> Response;
 
   auto ErrorCode(int) -> Response;
 
@@ -38,8 +38,6 @@ class Response {
  private:
   PrivateImplPtr p_;
 };
-
-typedef std::shared_ptr<Response> ResponsePtr;
 
 } // zutano
 

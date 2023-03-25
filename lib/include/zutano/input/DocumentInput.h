@@ -4,8 +4,7 @@
 #include <vector>
 #include <optional>
 
-namespace zutano {
-namespace input {
+namespace zutano::input {
 
 struct InsertInput {
   bool return_new{false};
@@ -51,6 +50,5 @@ struct ReplaceInput {
   bool silent{false};
 };
 
-} // input
 } // zutano
 

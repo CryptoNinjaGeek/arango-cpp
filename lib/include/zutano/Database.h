@@ -50,26 +50,24 @@ struct CollectionCreateInput {
 class Connection;
 class Database {
  public:
-  Database(Connection, std::string);
+  Database(const Connection &, std::string);
   Database() = default;
 
   ~Database() = default;
 
-  auto CreateDatatabase(DatabaseCreateInput) -> Database;
+  auto CreateDatabase(DatabaseCreateInput) -> Database;
 
   auto CreateCollection(CollectionCreateInput) -> Collection;
 
   auto Collection(std::string) -> Collection;
 
-  auto Execute(std::string) -> jsoncons::json;
+  auto Execute(const std::string &) -> jsoncons::json;
 
   auto name() -> std::string;
 
  private:
   PrivateImplPtr p_;
 };
-
-typedef std::shared_ptr<Database> DatabasePtr;
 
 } // zutano
 
