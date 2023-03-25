@@ -9,6 +9,7 @@
 namespace zutano {
 class Connection;
 class Database;
+class ResolveRecord;
 
 typedef std::shared_ptr<Connection> ConnectionPtr;
 
@@ -24,9 +25,13 @@ class Connection {
 
   auto Auth(std::string, std::string) -> Connection &;
 
+  auto Certificate(std::string) -> Connection &;
+
   auto Jwt(std::string) -> Connection &;
 
   auto Database(std::string) -> Database;
+
+  auto Resolve(std::vector<ResolveRecord>) -> Connection &;
 
   auto Ping() -> long;
 

@@ -36,7 +36,7 @@ Database::Database(const Connection &conn, std::string name) {
   p_ = p;
 }
 
-auto Database::CreateDatabase(DatabaseCreateInput input) -> Database {
+auto Database::CreateDatabase(input::DatabaseCreateInput input) -> Database {
   auto p = DatabasePimpl::Pimpl(p_);
 
   if (input.name.empty())
@@ -84,7 +84,7 @@ auto Database::CreateDatabase(DatabaseCreateInput input) -> Database {
   return {p->connection_, input.name};
 }
 
-auto Database::CreateCollection(CollectionCreateInput input) -> zutano::Collection {
+auto Database::CreateCollection(input::CollectionCreateInput input) -> zutano::Collection {
   auto p = DatabasePimpl::Pimpl(p_);
 
   if (input.name.empty())
@@ -155,7 +155,7 @@ auto Database::Collection(std::string name) -> zutano::Collection {
   return {p->connection_, *this, std::move(name)};
 }
 
-auto Database::Execute(const std::string &) -> jsoncons::json {
+auto Database::Execute(input::ExecuteInput) -> jsoncons::json {
   jsoncons::json j;
   return j;
 }
@@ -163,6 +163,54 @@ auto Database::Execute(const std::string &) -> jsoncons::json {
 auto Database::name() -> std::string {
   auto p = DatabasePimpl::Pimpl(p_);
   return p->name_;
+}
+
+auto Database::Explain(input::ExplainInput) -> jsoncons::json {
+
+}
+
+auto Database::Validate(std::string) -> jsoncons::json {
+
+}
+
+auto Database::Kill(std::string) -> bool {
+
+}
+
+auto Database::Queries() -> jsoncons::json {
+
+}
+
+auto Database::SlowQueries() -> jsoncons::json {
+
+}
+
+auto Database::ClearSlowQueries() -> bool {
+
+}
+
+auto Database::Tracking() -> jsoncons::json {
+
+}
+
+auto Database::SetTracking(input::TrackingInput) -> jsoncons::json {
+
+}
+
+auto Database::Functions() -> jsoncons::json {
+
+}
+
+auto Database::CreateFunction(input::CreateFunctionInput) -> jsoncons::json {
+
+}
+
+auto Database::DeleteFunction(input::DeleteFunctionInput) -> jsoncons::json {
+
+}
+
+auto Database::QueryRules() -> jsoncons::json {
+
 }
 
 } // zutano

@@ -10,27 +10,24 @@ auto main() -> int {
   try {
     auto conn = Connection()
         .Hosts({
-                   "http://localhost:8529/",
-                   "http://localhost:8529/",
-                   "http://localhost:8529/"
+                   "http://db1.google.dk:8529/",
+                   "http://db2.google.dk:8529/"
                })
-        .Auth("root", "EAS6wQuKbGH9kKxe");
-/*
- * Certificate(string)
- * Resolve(List<StringPair>)
- */
+        .Auth("root", "EAS6wQuKbGH9kKxe")
+        .Resolve({
+                     {"db1.google.dk", "127.0.0.1", 8529},
+                     {"db2.google.dk", "127.0.0.1", 8529}
+                 }
+        );
+
     if (conn.Ping())
       std::cout << "Ping'ed OK" << std::endl;
 
-    std::cout << "XXX" << std::endl;
     auto sys_db = conn.Database("_system");
-    std::cout << "XXX" << std::endl;
 
     sys_db.CreateDatabase({.name= "demo", .sharding="flexible", .allowConflict=true});
-    std::cout << "XXX" << std::endl;
 
     auto db = conn.Database("demo");
-    std::cout << "XXX" << std::endl;
 
     db.CreateCollection({.name="students", .allowConflict=true});
 
@@ -62,7 +59,7 @@ auto main() -> int {
     students.Delete(new_record);
     students.Delete(array);
 
-    auto cursor = db.Execute("FOR doc IN students RETURN doc");
+    auto cursor = db.Execute({.query="FOR doc IN students RETURN doc"});
 
     if (cursor.is_array()) {
       for (const auto &item : cursor.array_range()) {

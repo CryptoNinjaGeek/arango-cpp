@@ -23,6 +23,8 @@ class ConnectionPimpl : public PrivateImpl {
   std::string user_name_;
   std::string password_;
   std::string jwt_token_;
+  std::string certificate_;
+  std::vector<ResolveRecord> resolvers_;
   AuthType auth_type_{AuthType::NONE};
 
  public:
@@ -49,6 +51,12 @@ auto Connection::Create() -> ConnectionPtr {
 auto Connection::Host(const std::string &endpoint) -> Connection & {
   auto p = ConnectionPimpl::Pimpl(p_);
   p->endpoints_.push_back(tools::remove_last_slash(tools::trim(endpoint)));
+  return *this;
+}
+
+auto Connection::Resolve(std::vector<ResolveRecord> list) -> Connection & {
+  auto p = ConnectionPimpl::Pimpl(p_);
+  p->resolvers_ = list;
   return *this;
 }
 
@@ -116,6 +124,14 @@ auto Connection::SendRequest(Request request) -> Response {
   }
   session.SetHeader(headers);
 
+  if (!p->resolvers_.empty()) {
+    std::vector<cpr::Resolve> resolvers;
+    for (const auto &item : p->resolvers_) {
+      resolvers.push_back(cpr::Resolve{item.host, item.ip, {item.port}});
+    }
+    session.SetResolves(resolvers);
+  }
+
   if (not request.data().empty()) {
     session.SetBody(cpr::Body{request.data()});
   }
@@ -130,6 +146,9 @@ auto Connection::SendRequest(Request request) -> Response {
 #ifdef DEBUG_OUTPUT
   std::cout << session.GetFullRequestUrl() << std::endl;
 #endif
+
+  if (!p->certificate_.empty())
+    session.SetSslOptions(cpr::Ssl(cpr::ssl::PinnedPublicKey{p->certificate_.c_str()}));
 
   cpr::Response r;
   switch (request.method()) {
@@ -190,6 +209,12 @@ auto Connection::Ping() -> long {
   else if (not response.is_success())
     throw ServerError(response.error_message(), response.error_code());
   return response.http_code();
+}
+
+auto Connection::Certificate(std::string certificate) -> Connection & {
+  auto p = ConnectionPimpl::Pimpl(p_);
+  p->certificate_ = std::move(certificate);
+  return *this;
 }
 
 } // zutano

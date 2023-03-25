@@ -21,5 +21,11 @@ enum class HttpMethod {
 
 typedef std::pair<std::string, std::string> StringPair;
 
+struct ResolveRecord {
+  std::string host;
+  std::string ip;
+  unsigned short port;
+};
+
 } // zutano
 
