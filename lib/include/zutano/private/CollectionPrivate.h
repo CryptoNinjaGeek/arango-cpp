@@ -11,8 +11,8 @@ class CollectionPimpl : public PrivateImpl {
   Database db_;
   std::string name_;
 
-  static inline auto Pimpl(const std::shared_ptr<PrivateImpl> &p) {
+  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) {
     return std::dynamic_pointer_cast<CollectionPimpl>(p);
   }
 };
-} // zutano
+}  // namespace zutano::pimp

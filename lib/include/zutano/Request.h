@@ -14,23 +14,23 @@ class Request {
 
   ~Request() = default;
 
-  auto Method(HttpMethod method) -> Request;
+  auto method(HttpMethod method) -> Request;
 
-  auto Database(std::string endpoint) -> Request;
+  auto database(std::string endpoint) -> Request;
 
-  auto Collection(std::string endpoint) -> Request;
+  auto collection(std::string endpoint) -> Request;
 
-  auto Endpoint(const std::string &endpoint) -> Request;
+  auto endpoint(const std::string& endpoint) -> Request;
 
-  auto Data(std::string) -> Request;
+  auto data(std::string) -> Request;
 
-  auto Handle(std::string) -> Request;
+  auto handle(std::string) -> Request;
 
-  auto Id(std::string) -> Request;
+  auto id(std::string) -> Request;
 
-  auto Parameters(std::vector<StringPair>) -> Request;
+  auto parameters(std::vector<string_pair>) -> Request;
 
-  auto Headers(std::vector<StringPair>) -> Request;
+  auto headers(std::vector<string_pair>) -> Request;
 
   auto database() -> std::string;
 
@@ -46,12 +46,12 @@ class Request {
 
   auto data() -> std::string;
 
-  auto parameters() -> std::vector<StringPair>;
+  auto parameters() -> std::vector<string_pair>;
 
-  auto headers() -> std::vector<StringPair>;
+  auto headers() -> std::vector<string_pair>;
+
  private:
-  PrivateImplPtr p_;
+  private_impl_ptr p_;
 };
 
-} // zutano
-
+}  // namespace zutano

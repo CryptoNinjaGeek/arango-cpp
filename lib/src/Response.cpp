@@ -18,66 +18,62 @@ class ResponsePimpl : public PrivateImpl {
   jsoncons::json body_;
 
  public:
-  static inline auto Pimpl(const std::shared_ptr<PrivateImpl> &p) {
+  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) {
     return std::dynamic_pointer_cast<ResponsePimpl>(p);
   }
 };
 
-Response::Response() {
-  p_ = std::make_shared<ResponsePimpl>();
-}
+Response::Response() { p_ = std::make_shared<ResponsePimpl>(); }
 
-auto Response::http_code() -> long {
-  auto p = ResponsePimpl::Pimpl(p_);
+auto Response::httpCode() -> long {
+  auto p = ResponsePimpl::pimpl(p_);
   return p->http_code_;
 }
 
 auto Response::body() -> jsoncons::json {
-  auto p = ResponsePimpl::Pimpl(p_);
+  auto p = ResponsePimpl::pimpl(p_);
   return p->body_;
 }
 
-auto Response::error_code() -> int {
-  auto p = ResponsePimpl::Pimpl(p_);
+auto Response::errorCode() -> int {
+  auto p = ResponsePimpl::pimpl(p_);
   return p->error_code_;
 }
 
-auto Response::error_message() -> std::string {
-  auto p = ResponsePimpl::Pimpl(p_);
+auto Response::errorMessage() -> std::string {
+  auto p = ResponsePimpl::pimpl(p_);
   return p->error_message_;
 }
 
 auto Response::contains(std::vector<int> list) -> bool {
-  auto p = ResponsePimpl::Pimpl(p_);
+  auto p = ResponsePimpl::pimpl(p_);
 
   return std::find(begin(list), end(list), p->http_code_) != std::end(list);
 }
 
-auto Response::is_success() -> bool {
-  return contains({200, 201, 202});
-}
+auto Response::isSuccess() -> bool { return contains({200, 201, 202}); }
 
-auto Response::HttpCode(long code) -> Response {
-  auto p = ResponsePimpl::Pimpl(p_);
+auto Response::httpCode(long code) -> Response {
+  auto p = ResponsePimpl::pimpl(p_);
   p->http_code_ = code;
   return *this;
 }
 
-auto Response::ErrorCode(int code) -> Response {
-  auto p = ResponsePimpl::Pimpl(p_);
+auto Response::errorCode(int code) -> Response {
+  auto p = ResponsePimpl::pimpl(p_);
   p->error_code_ = code;
   return *this;
 }
 
-auto Response::Body(jsoncons::json body) -> Response {
-  auto p = ResponsePimpl::Pimpl(p_);
+auto Response::body(jsoncons::json body) -> Response {
+  auto p = ResponsePimpl::pimpl(p_);
   p->body_ = std::move(body);
   return *this;
 }
 
-auto Response::Message(std::string message) -> Response {
-  auto p = ResponsePimpl::Pimpl(p_);
+auto Response::message(std::string message) -> Response {
+  auto p = ResponsePimpl::pimpl(p_);
   p->error_message_ = std::move(message);
   return *this;
 }
-} // zutano
+}  // namespace zutano

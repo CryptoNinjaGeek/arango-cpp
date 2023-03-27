@@ -15,7 +15,7 @@
 
 namespace zutano {
 
-Collection::Collection(const Connection &conn, const Database &db, std::string name) {
+Collection::Collection(const Connection& conn, const Database& db, std::string name) {
   auto p = std::make_shared<pimp::CollectionPimpl>();
   p->connection_ = conn;
   p->name_ = std::move(name);
@@ -23,206 +23,184 @@ Collection::Collection(const Connection &conn, const Database &db, std::string n
   p_ = p;
 }
 
-auto Collection::Head(jsoncons::json doc) -> jsoncons::json {
-  auto p = pimp::CollectionPimpl::Pimpl(p_);
+auto Collection::head(jsoncons::json doc) -> jsoncons::json {
+  auto p = pimp::CollectionPimpl::pimpl(p_);
 
   auto r = Request()
-      .Method(HttpMethod::HEAD)
-      .Database(p->db_.name())
-      .Collection(p->name_)
-      .Endpoint(std::string("/document/{handle}"))
-      .Handle(GetHandleFromDocument(std::move(doc)));
+               .method(HttpMethod::HEAD)
+               .database(p->db_.name())
+               .collection(p->name_)
+               .endpoint(std::string("/document/{handle}"))
+               .handle(getHandleFromDocument(std::move(doc)));
 
-  auto response = p->connection_.SendRequest(r);
-  if (response.error_code() == 412)
+  auto response = p->connection_.sendRequest(r);
+  if (response.errorCode() == 412)
     throw AuthenticationError();
-  else if (not response.is_success())
-    throw ServerError(response.error_message(), response.error_code());
+  else if (not response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
 
   return response.body();
 }
 
-auto Collection::Insert(const jsoncons::json &doc, input::InsertInput input) -> jsoncons::json {
-  auto p = pimp::CollectionPimpl::Pimpl(p_);
-  std::vector<StringPair> params;
+auto Collection::insert(const jsoncons::json& doc, input::InsertInput input) -> jsoncons::json {
+  auto p = pimp::CollectionPimpl::pimpl(p_);
+  std::vector<string_pair> params;
 
-  params.emplace_back("returnNew", tools::to_string(input.return_new));
-  params.emplace_back("silent", tools::to_string(input.silent));
-  params.emplace_back("overwrite", tools::to_string(input.overwrite));
-  params.emplace_back("returnOld", tools::to_string(input.return_old));
+  params.emplace_back("returnNew", tools::toString(input.return_new));
+  params.emplace_back("silent", tools::toString(input.silent));
+  params.emplace_back("overwrite", tools::toString(input.overwrite));
+  params.emplace_back("returnOld", tools::toString(input.return_old));
 
-  if (input.sync)
-    params.emplace_back("waitForSync", tools::to_string(input.sync.value()));
-  if (input.overwrite_mode)
-    params.emplace_back("overwriteMode", input.overwrite_mode.value());
-  if (input.keep_none)
-    params.emplace_back("keepNull", tools::to_string(input.keep_none.value()));
-  if (input.merge)
-    params.emplace_back("mergeObjects", tools::to_string(input.merge.value()));
+  if (input.sync) params.emplace_back("waitForSync", tools::toString(input.sync.value()));
+  if (input.overwrite_mode) params.emplace_back("overwriteMode", input.overwrite_mode.value());
+  if (input.keep_none) params.emplace_back("keepNull", tools::toString(input.keep_none.value()));
+  if (input.merge) params.emplace_back("mergeObjects", tools::toString(input.merge.value()));
 
   auto r = Request()
-      .Method(HttpMethod::POST)
-      .Database(p->db_.name())
-      .Collection(p->name_)
-      .Parameters(params)
-      .Endpoint("/document/{collection}")
-      .Data(doc.to_string());
+               .method(HttpMethod::POST)
+               .database(p->db_.name())
+               .collection(p->name_)
+               .parameters(params)
+               .endpoint("/document/{collection}")
+               .data(doc.to_string());
 
-  auto response = p->connection_.SendRequest(r);
+  auto response = p->connection_.sendRequest(r);
   if (response.contains({401, 403}))
     throw AuthenticationError();
-  else if (not response.is_success())
-    throw ServerError(response.error_message(), response.error_code());
+  else if (not response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
 
   return response.body();
 }
 
-auto Collection::Delete(const jsoncons::json &doc, input::DeleteInput input) -> bool {
-  auto p = pimp::CollectionPimpl::Pimpl(p_);
+auto Collection::remove(const jsoncons::json& doc, input::DeleteInput input) -> bool {
+  auto p = pimp::CollectionPimpl::pimpl(p_);
 
-  std::vector<StringPair> params;
+  std::vector<string_pair> params;
 
-  params.emplace_back("returnOld", tools::to_string(input.return_old));
-  params.emplace_back("ignoreRevs", tools::to_string(not input.check_rev));
-  params.emplace_back("overwrite", tools::to_string(not input.check_rev));
-  params.emplace_back("silent", tools::to_string(input.silent));
+  params.emplace_back("returnOld", tools::toString(input.return_old));
+  params.emplace_back("ignoreRevs", tools::toString(not input.check_rev));
+  params.emplace_back("overwrite", tools::toString(not input.check_rev));
+  params.emplace_back("silent", tools::toString(input.silent));
 
-  if (input.sync)
-    params.emplace_back("waitForSync", tools::to_string(input.sync.value()));
+  if (input.sync) params.emplace_back("waitForSync", tools::toString(input.sync.value()));
 
-  auto r = Request()
-      .Method(HttpMethod::DELETE)
-      .Database(p->db_.name())
-      .Collection(p->name_)
-      .Parameters(params);
+  auto r = Request().method(HttpMethod::DELETE).database(p->db_.name()).collection(p->name_).parameters(params);
 
   if (doc.is_array())
-    r = r.Endpoint(std::string("/document/{collection}"))
-        .Data(doc.to_string());
+    r = r.endpoint(std::string("/document/{collection}")).data(doc.to_string());
   else
-    r = r.Endpoint(std::string("/document/{handle}"))
-        .Handle(GetHandleFromDocument(doc));
+    r = r.endpoint(std::string("/document/{handle}")).handle(getHandleFromDocument(doc));
 
-  auto response = p->connection_.SendRequest(r);
-  if (response.error_code() == 1202 and input.ignore_missing)
-    return false;
-  if (response.error_code() == 412)
+  auto response = p->connection_.sendRequest(r);
+  if (response.errorCode() == 1202 and input.ignore_missing) return false;
+  if (response.errorCode() == 412)
     throw AuthenticationError();
-  else if (not response.is_success())
-    throw ServerError(response.error_message(), response.error_code());
+  else if (not response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
 
   return true;
 }
 
-auto Collection::Update(const jsoncons::json &doc, input::UpdateInput input) -> jsoncons::json {
-  auto p = pimp::CollectionPimpl::Pimpl(p_);
+auto Collection::update(const jsoncons::json& doc, input::UpdateInput input) -> jsoncons::json {
+  auto p = pimp::CollectionPimpl::pimpl(p_);
 
-  std::vector<StringPair> params;
+  std::vector<string_pair> params;
 
-  params.emplace_back("keepNull", tools::to_string(input.keep_none));
-  params.emplace_back("mergeObjects", tools::to_string(input.merge));
-  params.emplace_back("returnNew", tools::to_string(input.return_new));
-  params.emplace_back("returnOld", tools::to_string(input.return_old));
-  params.emplace_back("ignoreRevs", tools::to_string(not input.check_rev));
-  params.emplace_back("overwrite", tools::to_string(not input.check_rev));
-  params.emplace_back("silent", tools::to_string(input.silent));
+  params.emplace_back("keepNull", tools::toString(input.keep_none));
+  params.emplace_back("mergeObjects", tools::toString(input.merge));
+  params.emplace_back("returnNew", tools::toString(input.return_new));
+  params.emplace_back("returnOld", tools::toString(input.return_old));
+  params.emplace_back("ignoreRevs", tools::toString(not input.check_rev));
+  params.emplace_back("overwrite", tools::toString(not input.check_rev));
+  params.emplace_back("silent", tools::toString(input.silent));
 
-  if (input.sync)
-    params.emplace_back("waitForSync", tools::to_string(input.sync.value()));
+  if (input.sync) params.emplace_back("waitForSync", tools::toString(input.sync.value()));
 
   auto r = Request()
-      .Method(HttpMethod::PATCH)
-      .Database(p->db_.name())
-      .Collection(p->name_)
-      .Parameters(params)
-      .Data(doc.to_string());
+               .method(HttpMethod::PATCH)
+               .database(p->db_.name())
+               .collection(p->name_)
+               .parameters(params)
+               .data(doc.to_string());
 
   if (doc.is_array())
-    r = r.Endpoint(std::string("/document/{collection}/"));
+    r = r.endpoint(std::string("/document/{collection}/"));
   else
-    r = r.Endpoint(std::string("/document/{handle}"))
-        .Handle(GetHandleFromDocument(doc));
+    r = r.endpoint(std::string("/document/{handle}")).handle(getHandleFromDocument(doc));
 
-  auto response = p->connection_.SendRequest(r);
-  if (response.error_code() == 412)
+  auto response = p->connection_.sendRequest(r);
+  if (response.errorCode() == 412)
     throw AuthenticationError();
-  else if (not response.is_success())
-    throw ServerError(response.error_message(), response.error_code());
+  else if (not response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
   else if (input.silent)
     return {};
 
   return response.body();
 }
 
-auto Collection::Replace(const jsoncons::json &doc, input::ReplaceInput input) -> jsoncons::json {
-  auto p = pimp::CollectionPimpl::Pimpl(p_);
+auto Collection::replace(const jsoncons::json& doc, input::ReplaceInput input) -> jsoncons::json {
+  auto p = pimp::CollectionPimpl::pimpl(p_);
 
-  std::vector<StringPair> params;
+  std::vector<string_pair> params;
 
-  params.emplace_back("returnNew", tools::to_string(input.return_new));
-  params.emplace_back("returnOld", tools::to_string(input.return_old));
-  params.emplace_back("ignoreRevs", tools::to_string(not input.check_rev));
-  params.emplace_back("overwrite", tools::to_string(not input.check_rev));
-  params.emplace_back("silent", tools::to_string(input.silent));
+  params.emplace_back("returnNew", tools::toString(input.return_new));
+  params.emplace_back("returnOld", tools::toString(input.return_old));
+  params.emplace_back("ignoreRevs", tools::toString(not input.check_rev));
+  params.emplace_back("overwrite", tools::toString(not input.check_rev));
+  params.emplace_back("silent", tools::toString(input.silent));
 
-  if (input.sync)
-    params.emplace_back("waitForSync", tools::to_string(input.sync.value()));
+  if (input.sync) params.emplace_back("waitForSync", tools::toString(input.sync.value()));
 
   auto r = Request()
-      .Method(HttpMethod::PUT)
-      .Database(p->db_.name())
-      .Collection(p->name_)
-      .Parameters(params)
-      .Data(doc.to_string());
+               .method(HttpMethod::PUT)
+               .database(p->db_.name())
+               .collection(p->name_)
+               .parameters(params)
+               .data(doc.to_string());
 
   if (doc.is_array())
-    r = r.Endpoint(std::string("/document/{collection}/"));
+    r = r.endpoint(std::string("/document/{collection}/"));
   else
-    r = r.Endpoint(std::string("/document/{handle}"))
-        .Handle(GetHandleFromDocument(doc));
+    r = r.endpoint(std::string("/document/{handle}")).handle(getHandleFromDocument(doc));
 
-  auto response = p->connection_.SendRequest(r);
-  if (response.error_code() == 412)
+  auto response = p->connection_.sendRequest(r);
+  if (response.errorCode() == 412)
     throw AuthenticationError();
-  else if (not response.is_success())
-    throw ServerError(response.error_message(), response.error_code());
+  else if (not response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
   else if (input.silent)
     return {};
 
   return response.body();
 }
 
-auto Collection::Get(const jsoncons::json &doc, const input::GetInput &input) -> jsoncons::json {
-  auto p = pimp::CollectionPimpl::Pimpl(p_);
+auto Collection::get(const jsoncons::json& doc, const input::GetInput& input) -> jsoncons::json {
+  auto p = pimp::CollectionPimpl::pimpl(p_);
 
-  std::vector<StringPair> headers;
-  if (input.allow_dirty_read)
-    headers.emplace_back("x-arango-allow-dirty-read", tools::to_string(true));
+  std::vector<string_pair> headers;
+  if (input.allow_dirty_read) headers.emplace_back("x-arango-allow-dirty-read", tools::toString(true));
 
-  auto r = Request()
-      .Method(HttpMethod::GET)
-      .Headers(headers)
-      .Database(p->db_.name())
-      .Collection(p->name_);
+  auto r = Request().method(HttpMethod::GET).headers(headers).database(p->db_.name()).collection(p->name_);
 
   if (doc.is_array())
-    r = r.Endpoint(std::string("/document/{collection}/"));
+    r = r.endpoint(std::string("/document/{collection}/"));
   else
-    r = r.Endpoint(std::string("/document/{handle}"))
-        .Handle(GetHandleFromDocument(doc));
+    r = r.endpoint(std::string("/document/{handle}")).handle(getHandleFromDocument(doc));
 
-  auto response = p->connection_.SendRequest(r);
-  if (response.error_code() == 1202)
+  auto response = p->connection_.sendRequest(r);
+  if (response.errorCode() == 1202)
     return {};
-  else if (response.error_code() == 412)
+  else if (response.errorCode() == 412)
     throw AuthenticationError();
-  else if (not response.is_success())
-    throw ServerError(response.error_message(), response.error_code());
+  else if (not response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
 
   return response.body();
 }
 
-auto Collection::GetHandleFromDocument(jsoncons::json doc) -> std::string {
+auto Collection::getHandleFromDocument(jsoncons::json doc) -> std::string {
   if (doc.contains("_id"))
     return doc["_id"].as<std::string>();
   else if (doc.contains("_key"))
@@ -230,20 +208,19 @@ auto Collection::GetHandleFromDocument(jsoncons::json doc) -> std::string {
   return {};
 }
 
-auto Collection::Truncate() -> bool {
-  auto p = pimp::CollectionPimpl::Pimpl(p_);
+auto Collection::truncate() -> bool {
+  auto p = pimp::CollectionPimpl::pimpl(p_);
 
   auto r = Request()
-      .Method(HttpMethod::PUT)
-      .Database(p->db_.name())
-      .Collection(p->name_)
-      .Endpoint("/collection/{collection}/truncate");
+               .method(HttpMethod::PUT)
+               .database(p->db_.name())
+               .collection(p->name_)
+               .endpoint("/collection/{collection}/truncate");
 
-  auto response = p->connection_.SendRequest(r);
-  if (not response.is_success())
-    throw ServerError(response.error_message(), response.error_code());
+  auto response = p->connection_.sendRequest(r);
+  if (not response.isSuccess()) throw ServerError(response.errorMessage(), response.errorCode());
 
   return true;
 }
 
-} // zutano
+}  // namespace zutano

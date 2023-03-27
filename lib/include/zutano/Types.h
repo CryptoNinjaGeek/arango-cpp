@@ -4,22 +4,11 @@
 
 namespace zutano {
 
-enum class AuthType {
-  NONE,
-  BASIC_AUTH,
-  JWT
-};
+enum class AuthType { NONE, BASIC_AUTH, JWT };
 
-enum class HttpMethod {
-  GET,
-  POST,
-  PUT,
-  DELETE,
-  PATCH,
-  HEAD
-};
+enum class HttpMethod { GET, POST, PUT, DELETE, PATCH, HEAD };
 
-typedef std::pair<std::string, std::string> StringPair;
+typedef std::pair<std::string, std::string> string_pair;
 
 struct ResolveRecord {
   std::string host;
@@ -27,5 +16,4 @@ struct ResolveRecord {
   unsigned short port;
 };
 
-} // zutano
-
+}  // namespace zutano

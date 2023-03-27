@@ -11,40 +11,34 @@ class Connection;
 class Database;
 class ResolveRecord;
 
-typedef std::shared_ptr<Connection> ConnectionPtr;
-
 class Connection {
  public:
   Connection();
 
   ~Connection() = default;
 
-  auto Host(const std::string &) -> Connection &;
+  auto host(const std::string&) -> Connection&;
 
-  auto Hosts(const std::vector<std::string> &) -> Connection &;
+  auto hosts(const std::vector<std::string>&) -> Connection&;
 
-  auto Auth(std::string, std::string) -> Connection &;
+  auto auth(std::string, std::string) -> Connection&;
 
-  auto Certificate(std::string) -> Connection &;
+  auto certificate(std::string) -> Connection&;
 
-  auto Jwt(std::string) -> Connection &;
+  auto jwt(std::string) -> Connection&;
 
-  auto Database(std::string) -> Database;
+  auto database(std::string) -> Database;
 
-  auto Resolve(std::vector<ResolveRecord>) -> Connection &;
+  auto resolve(std::vector<ResolveRecord>) -> Connection&;
 
-  auto Ping() -> long;
+  auto ping() -> long;
 
-  auto SendRequest(Request) -> Response;
+  auto sendRequest(Request) -> Response;
 
-  static auto StandardHeaders(std::vector<StringPair> &) -> void;
-
- public:
-  static auto Create() -> ConnectionPtr;
+  static auto standardHeaders(std::vector<string_pair>&) -> void;
 
  private:
-  PrivateImplPtr p_;
+  private_impl_ptr p_;
 };
 
-} // zutano
-
+}  // namespace zutano

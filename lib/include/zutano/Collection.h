@@ -13,42 +13,39 @@ class Collection;
 class Connection;
 class Database;
 
-[[maybe_unused]] typedef std::shared_ptr<Collection> CollectionPtr;
-
 class Collection {
  public:
-  Collection(const Connection &, const Database &, std::string);
+  Collection(const Connection&, const Database&, std::string);
 
   ~Collection() = default;
 
-  auto Truncate() -> bool;
-  auto Head(jsoncons::json) -> jsoncons::json;
+  auto truncate() -> bool;
+  auto head(jsoncons::json) -> jsoncons::json;
 
   // Document modifications
-  auto Insert(const jsoncons::json &, input::InsertInput = {}) -> jsoncons::json;
-  auto Delete(const jsoncons::json &, input::DeleteInput = {}) -> bool;
-  auto Update(const jsoncons::json &, input::UpdateInput = {}) -> jsoncons::json;
-  auto Replace(const jsoncons::json &, input::ReplaceInput = {}) -> jsoncons::json;
-  auto Get(const jsoncons::json &, const input::GetInput &) -> jsoncons::json;
+  auto insert(const jsoncons::json& doc, input::InsertInput) -> jsoncons::json;
+  auto remove(const jsoncons::json&, input::DeleteInput = {}) -> bool;
+  auto update(const jsoncons::json& doc, input::UpdateInput) -> jsoncons::json;
+  auto replace(const jsoncons::json& doc, input::ReplaceInput input = {}) -> jsoncons::json;
+  auto get(const jsoncons::json& doc, const input::GetInput&) -> jsoncons::json;
 
   // Indexes
-  auto AddHashIndex(input::IndexCreateInput) -> jsoncons::json;
-  auto AddSkiplistIndex(input::IndexCreateInput) -> jsoncons::json;
-  auto AddGeoIndex(input::GeoIndexCreateInput) -> jsoncons::json;
-  auto AddFulltextIndex(input::FulltextIndexCreateInput) -> jsoncons::json;
-  auto AddPersistentIndex(input::PersistentIndexCreateInput) -> jsoncons::json;
-  auto AddTTLIndex(input::TTLIndexCreateInput) -> jsoncons::json;
-  auto AddInvertedIndex(input::InvertedIndexCreateInput) -> jsoncons::json;
-  auto DeleteIndex(const std::string &, bool ignore_missing = false) -> bool;
-  auto LoadIndexesIntoMemory() -> bool;
+  auto addHashIndex(input::IndexCreateInput) -> jsoncons::json;
+  auto addSkiplistIndex(input::IndexCreateInput) -> jsoncons::json;
+  auto addGeoIndex(input::GeoIndexCreateInput) -> jsoncons::json;
+  auto addFulltextIndex(input::FulltextIndexCreateInput) -> jsoncons::json;
+  auto addPersistentIndex(input::PersistentIndexCreateInput) -> jsoncons::json;
+  auto addTTLIndex(input::TTLIndexCreateInput) -> jsoncons::json;
+  auto addInvertedIndex(input::InvertedIndexCreateInput) -> jsoncons::json;
+  auto deleteIndex(const std::string&, bool ignore_missing = false) -> bool;
+  auto loadIndexesIntoMemory() -> bool;
 
  protected:
-  auto AddIndex(const jsoncons::json &) -> jsoncons::json;
-  static auto GetHandleFromDocument(jsoncons::json) -> std::string;
+  auto addIndex(const jsoncons::json&) -> jsoncons::json;
+  static auto getHandleFromDocument(jsoncons::json) -> std::string;
 
  private:
-  PrivateImplPtr p_;
+  private_impl_ptr p_;
 };
 
-} // zutano
-
+}  // namespace zutano

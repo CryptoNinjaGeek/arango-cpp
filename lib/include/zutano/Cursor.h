@@ -14,41 +14,39 @@ class Connection;
 
 class Cursor {
  public:
-  Cursor(const std::string &dbName, const Connection &conn, const jsoncons::json &);
+  Cursor(const std::string& db_name, const Connection& conn, const jsoncons::json&);
 
   ~Cursor();
 
-  auto Id() -> std::string;
+  auto id() -> std::string;
 
-  auto Type() -> std::string;
+  auto type() -> std::string;
 
-  auto Count() -> long;
+  auto count() -> long;
 
-  auto HasMore() -> bool;
+  auto hasMore() -> bool;
 
-  auto Next() -> jsoncons::json;
+  auto next() -> jsoncons::json;
 
-  auto Cached() -> std::string;
+  auto cached() -> std::string;
 
-  auto Statistics() -> jsoncons::json;
+  auto statistics() -> jsoncons::json;
 
-  auto Profile() -> std::string;
+  auto profile() -> std::string;
 
-  auto Warnings() -> std::string;
+  auto warnings() -> std::string;
 
-  auto Empty() -> bool;
-
- private:
-
-  auto Update(jsoncons::json) -> bool;
-
-  auto Fetch() -> bool;
-
-  auto Close(bool ignore_missing = false) -> bool;
+  auto empty() -> bool;
 
  private:
-  PrivateImplPtr p_;
+  auto update(jsoncons::json) -> bool;
+
+  auto fetch() -> bool;
+
+  auto close(bool ignore_missing = false) -> bool;
+
+ private:
+  private_impl_ptr p_;
 };
 
-} // zutano
-
+}  // namespace zutano
