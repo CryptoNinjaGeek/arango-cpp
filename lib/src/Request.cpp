@@ -12,6 +12,7 @@ namespace zutano {
 class RequestPimpl : public PrivateImpl {
  public:
   HttpMethod method_{HttpMethod::GET};
+  std::string id_;
   std::string endpoint_;
   std::string data_;
   std::string database_name_;
@@ -22,7 +23,7 @@ class RequestPimpl : public PrivateImpl {
 
  public:
   static inline auto Pimpl(const std::shared_ptr<PrivateImpl> &p) {
-    return std::dynamic_pointer_cast<RequestPimpl>(p);
+	return std::dynamic_pointer_cast<RequestPimpl>(p);
   }
 };
 
@@ -54,6 +55,12 @@ auto Request::Handle(std::string name) -> Request {
   return *this;
 }
 
+auto Request::Id(std::string name) -> Request {
+  auto p = RequestPimpl::Pimpl(p_);
+  p->id_ = std::move(name);
+  return *this;
+}
+
 auto Request::Collection(std::string name) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
   p->collection_name_ = std::move(name);
@@ -76,8 +83,8 @@ auto Request::Endpoint(const std::string &endpoint) -> Request {
   auto p = RequestPimpl::Pimpl(p_);
   auto tmp_endpoint = tools::trim(endpoint);
 
-  if (tmp_endpoint.length() > 1 && tmp_endpoint.find_first_of('/') == 0)
-    tmp_endpoint = tmp_endpoint.substr(1, tmp_endpoint.length() - 1);
+  if (tmp_endpoint.length() > 1 && tmp_endpoint.find_first_of('/')==0)
+	tmp_endpoint = tmp_endpoint.substr(1, tmp_endpoint.length() - 1);
 
   p->endpoint_ = tmp_endpoint;
   return *this;
@@ -101,6 +108,11 @@ auto Request::collection() -> std::string {
 auto Request::handle() -> std::string {
   auto p = RequestPimpl::Pimpl(p_);
   return p->document_handle_;
+}
+
+auto Request::id() -> std::string {
+  auto p = RequestPimpl::Pimpl(p_);
+  return p->id_;
 }
 
 auto Request::method() -> HttpMethod {

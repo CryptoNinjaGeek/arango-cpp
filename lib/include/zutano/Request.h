@@ -26,6 +26,8 @@ class Request {
 
   auto Handle(std::string) -> Request;
 
+  auto Id(std::string) -> Request;
+
   auto Parameters(std::vector<StringPair>) -> Request;
 
   auto Headers(std::vector<StringPair>) -> Request;
@@ -39,6 +41,8 @@ class Request {
   auto method() -> HttpMethod;
 
   auto handle() -> std::string;
+
+  auto id() -> std::string;
 
   auto data() -> std::string;
 
