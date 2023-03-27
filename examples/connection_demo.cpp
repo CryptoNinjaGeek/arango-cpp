@@ -8,66 +8,66 @@ using namespace jsoncons::literals;
 auto main() -> int {
 
   try {
-    auto conn = Connection()
-        .Hosts({
-                   "http://db1.google.dk:8529/",
-                   "http://db2.google.dk:8529/"
-               })
-        .Auth("root", "EAS6wQuKbGH9kKxe")
-        .Resolve({
-                     {"db1.google.dk", "127.0.0.1", 8529},
-                     {"db2.google.dk", "127.0.0.1", 8529}
-                 }
-        );
+	auto conn = Connection()
+		.Hosts({
+				   "http://db1.google.dk:8529/",
+				   "http://db2.google.dk:8529/"
+			   })
+		.Auth("root", "EAS6wQuKbGH9kKxe")
+		.Resolve({
+					 {"db1.google.dk", "10.211.55.4", 8529},
+					 {"db2.google.dk", "10.211.55.4", 8529}
+				 }
+		);
 
-    if (conn.Ping())
-      std::cout << "Ping'ed OK" << std::endl;
+	if (conn.Ping())
+	  std::cout << "Ping'ed OK" << std::endl;
 
-    auto sys_db = conn.Database("_system");
+	auto sys_db = conn.Database("_system");
 
-    sys_db.CreateDatabase({.name= "demo", .sharding="flexible", .allowConflict=true});
+	sys_db.CreateDatabase({.name= "demo", .sharding="flexible", .allow_conflict=true});
 
-    auto db = conn.Database("demo");
+	auto db = conn.Database("demo");
 
-    db.CreateCollection({.name="students", .allowConflict=true});
+	db.CreateCollection({.name="students", .allow_conflict=true});
 
-    auto students = db.Collection("students");
+	auto students = db.Collection("students");
 
-    students.Truncate();
+	students.Truncate();
 
-    students.AddHashIndex({.fields= {"name"}, .unique= true});
+	students.AddHashIndex({.fields= {"name"}, .unique= true});
 
-    students.Insert(to_json{{"name", "jane5"}, {"age", 39}}, {.overwrite=true});
-    students.Insert(to_json{{"name", "josh1"}, {"age", 18}}, {.overwrite=true});
+	students.Insert(to_json{{"name", "jane5"}, {"age", 39}}, {.overwrite=true});
+	students.Insert(to_json{{"name", "josh1"}, {"age", 18}}, {.overwrite=true});
 
-    jsoncons::json array(jsoncons::json_array_arg);
-    array.push_back(to_json{{"name", "josh2"}, {"age", 19}});
-    array.push_back(to_json{{"name", "josh3"}, {"age", 20}});
-    array.push_back(to_json{{"name", "josh4"}, {"age", 21}});
-    array = students.Insert(array, {.overwrite=true});
+	jsoncons::json array(jsoncons::json_array_arg);
+	for (int no = 1; no < 100000; no++)
+	  array.push_back(to_json{{"name", std::string("josh-") + std::to_string(no)}, {"age", no}});
+	array = students.Insert(array, {.overwrite=true});
 
-    auto result = students.Insert(to_json{{"name", "judy1"}, {"age", 21}}, {.return_new=true, .overwrite=true});
-    auto new_record = result["new"];
+	auto result = students.Insert(to_json{{"name", "judy1"}, {"age", 21}}, {.overwrite=true, .sync=false});
+	auto new_record = result["new"];
 
-    new_record["name"] = "Hannah";
+	return 0;
+	new_record["name"] = "Hannah";
 
-    students.Replace(new_record);
+	students.Replace(new_record);
 
-    new_record["name"] = "Bannah";
+	new_record["name"] = "Bannah";
 
-    students.Update(new_record, {.check_rev=false});
-    students.Delete(new_record);
-    students.Delete(array);
+	students.Update(new_record, {.check_rev=false});
+	students.Delete(new_record);
 
-    auto cursor = db.Execute({.query="FOR doc IN students RETURN doc"});
+	auto cursor = db.Execute({.query="FOR doc IN students RETURN doc", .batch_size=100, .count=true});
 
-    if (cursor.is_array()) {
-      for (const auto &item : cursor.array_range()) {
-        pretty_print(item);
-      }
-    }
+	while (cursor.HasMore()) {
+	  auto row = cursor.Next();
+	  std::cout << pretty_print(row) << "\n\n";
+	}
+	students.Delete(array);
+
   } catch (std::exception &e) {
-    std::cout << e.what() << std::endl;
+	std::cout << e.what() << std::endl;
   }
 
   return 0;

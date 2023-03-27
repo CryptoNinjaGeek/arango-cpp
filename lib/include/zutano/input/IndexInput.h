@@ -20,7 +20,7 @@ struct GeoIndexCreateInput {
   std::optional<std::string> name;
   std::optional<bool> in_background;
   std::optional<bool> ordered;
-  std::optional<bool> legacyPolygons{false};
+  std::optional<bool> legacy_polygons{false};
 };
 
 struct FulltextIndexCreateInput {
@@ -36,8 +36,8 @@ struct PersistentIndexCreateInput {
   std::optional<bool> in_background;
   std::optional<bool> unique;
   std::optional<bool> sparse;
-  std::optional<bool> cacheEnabled;
-  std::optional<std::vector<std::string>> storedValues;
+  std::optional<bool> cache_enabled;
+  std::optional<std::vector<std::string>> stored_values;
 };
 
 struct TTLIndexCreateInput {
@@ -52,13 +52,13 @@ struct InvertedIndexCreateInput {
   std::optional<std::string> name;
   std::optional<bool> in_background;
   std::optional<int> parallelism;
-  std::optional<std::vector<std::string>> primarySort;
-  std::optional<std::vector<std::string>> storedValues;
+  std::optional<std::vector<std::string>> primary_sort;
+  std::optional<std::vector<std::string>> stored_values;
   std::optional<std::string> analyzer;
   std::optional<std::vector<std::string>> features;
-  std::optional<bool> includeAllFields;
-  std::optional<bool> trackListPositions;
-  std::optional<bool> searchField;
+  std::optional<bool> include_all_fields;
+  std::optional<bool> track_list_positions;
+  std::optional<bool> search_field;
 };
 
 } // zutano

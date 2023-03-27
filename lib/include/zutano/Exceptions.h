@@ -11,7 +11,7 @@ class AuthenticationError : public std::exception {
   AuthenticationError() : message_{"Unknown username/password"} {}
 
   [[nodiscard]] const char *what() const noexcept override {
-    return message_.c_str();
+	return message_.c_str();
   }
  private:
   std::string message_;
@@ -20,17 +20,17 @@ class AuthenticationError : public std::exception {
 class ServerError : public std::exception {
  public:
   ServerError(const std::string &m, int error_code) {
-    std::ostringstream stringStream;
-    stringStream << "ServerError (";
-    stringStream << error_code;
-    stringStream << ") : ";
-    stringStream << m;
+	std::ostringstream string_stream;
+	string_stream << "ServerError (";
+	string_stream << error_code;
+	string_stream << ") : ";
+	string_stream << m;
 
-    message_ = stringStream.str();
+	message_ = string_stream.str();
   }
 
   [[nodiscard]] const char *what() const noexcept override {
-    return message_.c_str();
+	return message_.c_str();
   }
  private:
   std::string message_;
@@ -41,7 +41,7 @@ class RequestError : public std::exception {
   explicit RequestError(const std::string &m) : message_{"Unknown endpoint: " + m} {}
 
   [[nodiscard]] const char *what() const noexcept override {
-    return message_.c_str();
+	return message_.c_str();
   }
  private:
   std::string message_;
@@ -52,7 +52,7 @@ class ClientError : public std::exception {
   explicit ClientError(const std::string &m) : message_{"Client error: " + m} {}
 
   [[nodiscard]] const char *what() const noexcept override {
-    return message_.c_str();
+	return message_.c_str();
   }
  private:
   std::string message_;

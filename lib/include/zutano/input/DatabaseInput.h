@@ -20,7 +20,7 @@ struct DatabaseCreateInput {
   std::optional<int> replication_factor{3};
   std::optional<int> write_concern{0};
   std::optional<std::string> sharding;
-  bool allowConflict{true};
+  bool allow_conflict{true};
 };
 
 struct CollectionCreateInput {
@@ -42,8 +42,8 @@ struct CollectionCreateInput {
   std::optional<std::string> smart_join_attribute;
   std::optional<int> write_concern;
   std::optional<jsoncons::json> schema;
-  std::optional<jsoncons::json> computedValues;
-  bool allowConflict{true};
+  std::optional<jsoncons::json> computed_values;
+  bool allow_conflict{true};
 };
 
 struct ExplainInput {

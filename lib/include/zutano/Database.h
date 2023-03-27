@@ -4,6 +4,7 @@
 #include <vector>
 #include <zutano/PrivateImpl.h>
 #include <zutano/Collection.h>
+#include <zutano/Cursor.h>
 #include <jsoncons/json.hpp>
 #include <zutano/input/DatabaseInput.h>
 
@@ -18,7 +19,7 @@ class Database {
   ~Database() = default;
 
   // Query functions
-  auto Execute(input::ExecuteInput) -> jsoncons::json;
+  auto Execute(input::ExecuteInput) -> Cursor;
 
   auto Explain(input::ExplainInput) -> jsoncons::json;
 
@@ -38,9 +39,9 @@ class Database {
 
   auto Functions() -> jsoncons::json;
 
-  auto CreateFunction(input::CreateFunctionInput) -> jsoncons::json;
+  auto CreateFunction(const input::CreateFunctionInput &) -> jsoncons::json;
 
-  auto DeleteFunction(input::DeleteFunctionInput) -> jsoncons::json;
+  auto DeleteFunction(const input::DeleteFunctionInput &) -> jsoncons::json;
 
   auto QueryRules() -> jsoncons::json;
 

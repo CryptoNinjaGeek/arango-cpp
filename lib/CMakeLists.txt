@@ -33,7 +33,7 @@ add_library(zutano SHARED
         include/zutano/input/DocumentInput.h
         include/zutano/input/DocumentInput.h
         include/zutano/input/IndexInput.h
-        )
+        src/Cursor.cpp include/zutano/Cursor.h)
 
 target_link_libraries(zutano PRIVATE
         cpr::cpr
