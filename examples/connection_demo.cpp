@@ -48,7 +48,6 @@ auto main() -> int {
 	auto result = students.Insert(to_json{{"name", "judy1"}, {"age", 21}}, {.overwrite=true, .sync=false});
 	auto new_record = result["new"];
 
-	return 0;
 	new_record["name"] = "Hannah";
 
 	students.Replace(new_record);
