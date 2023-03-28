@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 
 add_subdirectory(lib)
+add_subdirectory(tools)
 
 if (ZUTANO_TESTS)
     add_subdirectory(tests)

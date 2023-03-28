@@ -14,7 +14,7 @@
 #include <utility>
 
 // #define DEBUG_OUTPUT
-#define DEBUG_OUTPUT_URL
+// #define DEBUG_OUTPUT_URL
 
 namespace zutano {
 
@@ -29,9 +29,7 @@ class ConnectionPimpl : public PrivateImpl {
   AuthType auth_type_{AuthType::NONE};
 
  public:
-  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) {
-    return std::dynamic_pointer_cast<ConnectionPimpl>(p);
-  }
+  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<ConnectionPimpl>(p); }
 
   auto host() -> std::string { return this->endpoints_.at(last_++ % this->endpoints_.size()); }
 
@@ -170,11 +168,7 @@ auto Connection::sendRequest(Request request) -> Response {
   if (not r.text.empty()) j = jsoncons::json::parse(r.text);
 
   if (j.contains("error") && j["error"].as<bool>()) {
-    return Response()
-        .body(j)
-        .httpCode(r.status_code)
-        .errorCode(j["errorNum"].as<int>())
-        .message(j["errorMessage"].as<std::string>());
+    return Response().body(j).httpCode(r.status_code).errorCode(j["errorNum"].as<int>()).message(j["errorMessage"].as<std::string>());
   } else {
     return Response().body(j).httpCode(r.status_code);
   }

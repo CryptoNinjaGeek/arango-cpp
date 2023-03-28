@@ -24,36 +24,36 @@ auto main() -> int {
 
     auto students = db.collection("students");
 
-    students.truncate();
+    /*    students.truncate();
+        students.addHashIndex({.fields = {"name"}, .unique = true});
+        students.insert(to_json{{"name", "jane5"}, {"age", 39}}, {.overwrite = true});
+        students.insert(to_json{{"name", "josh1"}, {"age", 18}}, {.overwrite = true});
 
-    students.addHashIndex({.fields = {"name"}, .unique = true});
+        jsoncons::json array(jsoncons::json_array_arg);
+        for (int no = 1; no < 100000; no++) {
+          array.push_back(to_json{{"name", std::string("josh-") + std::to_string(no)}, {"age", no}});
+        }
+        array = students.insert(array, {.sync = false});
 
-    students.insert(to_json{{"name", "jane5"}, {"age", 39}}, {.overwrite = true});
-    students.insert(to_json{{"name", "josh1"}, {"age", 18}}, {.overwrite = true});
+        auto result = students.insert(to_json{{"name", "judy1"}, {"age", 21}}, {.overwrite = true, .return_new = true});
+        auto new_record = result["new"];
 
-    jsoncons::json array(jsoncons::json_array_arg);
-    for (int no = 1; no < 100000; no++) array.push_back(to_json{{"name", std::string("josh-") + std::to_string(no)}, {"age", no}});
-    array = students.insert(array, {.sync = false});
+        new_record["name"] = "Hannah";
 
-    auto result = students.insert(to_json{{"name", "judy1"}, {"age", 21}}, {.overwrite = true, .return_new = true});
-    auto new_record = result["new"];
+        students.replace(new_record);
 
-    new_record["name"] = "Hannah";
+        new_record["name"] = "Bannah";
 
-    students.replace(new_record);
-
-    new_record["name"] = "Bannah";
-
-    students.update(new_record, {.check_rev = false});
-    students.remove(new_record);
-
+        students.update(new_record, {.check_rev = false});
+        students.remove(new_record);
+    */
     auto cursor = db.execute({.query = "FOR doc IN students RETURN doc", .count = true, .batch_size = 100});
 
     while (cursor.hasMore()) {
       auto row = cursor.next();
       std::cout << pretty_print(row) << "\n\n";
     }
-    students.remove(array);
+    //    students.remove(array);
 
   } catch (std::exception& e) {
     std::cout << e.what() << std::endl;

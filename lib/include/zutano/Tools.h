@@ -21,8 +21,7 @@ inline std::string trim(const std::string& s) { return rtrim(ltrim(s)); }
 
 inline std::string toString(bool b) { return b ? "true" : "false"; }
 
-inline bool replace(std::string& str, const std::string& from,
-                    const std::string& to) {
+inline bool replace(std::string& str, const std::string& from, const std::string& to) {
   size_t start_pos = str.find(from);
   if (start_pos == std::string::npos) return false;
   str.replace(start_pos, from.length(), to);
@@ -37,12 +36,19 @@ inline std::string toArray(jsoncons::json doc) {
 }
 
 inline std::string removeLastSlash(std::string str) {
-  if (str.length() > 1 && str.find_last_of('/') == str.length() - 1)
-    str = str.substr(0, str.length() - 1);
+  if (str.length() > 1 && str.find_last_of('/') == str.length() - 1) str = str.substr(0, str.length() - 1);
   return str;
 }
 
-typedef std::map<std::string, std::variant<std::string, bool, int, char, double,
-                                           long, std::vector<std::string>>>
-    to_json;
+inline std::vector<std::string> split(std::string str, char sep) {
+  std::vector<std::string> strings;
+  std::istringstream f(str);
+  std::string s;
+  while (getline(f, s, sep)) {
+    strings.push_back(s);
+  }
+  return strings;
+}
+
+typedef std::map<std::string, std::variant<std::string, bool, int, char, double, long, std::vector<std::string>>> to_json;
 }  // namespace zutano::tools
