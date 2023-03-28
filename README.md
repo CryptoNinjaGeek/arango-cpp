@@ -31,10 +31,10 @@ sys_db.CreateDatatabase("demo");
 auto db = conn.Database("demo");
 
 // Create a new Collection named "students".
-auto students = db.CreateCollection("students");
+auto students = db.createCollection("students");
 
 // Add a hash index to the Collection.
-students.AddHashIndex({ .fields= { "name" }, .unique= true });
+students.addHashIndex({ .fields= { "name" }, .unique= true });
 
 // Insert new documents into the Collection.
 students.Insert({

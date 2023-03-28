@@ -13,51 +13,50 @@ namespace zutano {
 class Connection;
 class Database {
  public:
-  Database(const Connection &, std::string);
+  Database(const Connection&, std::string);
   Database() = default;
 
   ~Database() = default;
 
   // Query functions
-  auto Execute(input::ExecuteInput) -> Cursor;
+  auto execute(input::ExecuteInput) -> Cursor;
 
-  auto Explain(input::ExplainInput) -> jsoncons::json;
+  auto explain(input::ExplainInput) -> jsoncons::json;
 
-  auto Validate(std::string) -> jsoncons::json;
+  auto validate(std::string) -> jsoncons::json;
 
-  auto Kill(std::string) -> bool;
+  auto kill(std::string) -> bool;
 
-  auto Queries() -> jsoncons::json;
+  auto queries() -> jsoncons::json;
 
-  auto SlowQueries() -> jsoncons::json;
+  auto slowQueries() -> jsoncons::json;
 
-  auto ClearSlowQueries() -> bool;
+  auto clearSlowQueries() -> bool;
 
-  auto Tracking() -> jsoncons::json;
+  auto tracking() -> jsoncons::json;
 
-  auto SetTracking(input::TrackingInput) -> jsoncons::json;
+  auto setTracking(input::TrackingInput) -> jsoncons::json;
 
-  auto Functions() -> jsoncons::json;
+  auto functions() -> jsoncons::json;
 
-  auto CreateFunction(const input::CreateFunctionInput &) -> jsoncons::json;
+  auto createFunction(const input::CreateFunctionInput&) -> jsoncons::json;
 
-  auto DeleteFunction(const input::DeleteFunctionInput &) -> jsoncons::json;
+  auto deleteFunction(const input::DeleteFunctionInput&) -> jsoncons::json;
 
-  auto QueryRules() -> jsoncons::json;
+  auto queryRules() -> jsoncons::json;
 
   // Create functions
-  auto CreateDatabase(input::DatabaseCreateInput) -> Database;
+  auto createDatabase(input::DatabaseCreateInput) -> Database;
 
-  auto CreateCollection(input::CollectionCreateInput) -> Collection;
+  auto createCollection(input::CollectionCreateInput) -> Collection;
 
   // Access functions
-  auto Collection(std::string) -> Collection;
+  auto collection(std::string) -> Collection;
 
   auto name() -> std::string;
 
  private:
-  PrivateImplPtr p_;
+  private_impl_ptr p_;
 };
 
-} // zutano
-
+}  // namespace zutano

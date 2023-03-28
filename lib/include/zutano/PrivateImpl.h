@@ -8,11 +8,8 @@ class PrivateImpl {
  public:
   ~PrivateImpl() = default;
 
-  virtual auto ClassName() -> std::string {
-	return "PrivateImpl";
-  }
+  virtual auto className() -> std::string { return "PrivateImpl"; }
 };
 
-typedef std::shared_ptr<PrivateImpl> PrivateImplPtr;
-}
-
+typedef std::shared_ptr<PrivateImpl> private_impl_ptr;
+}  // namespace zutano

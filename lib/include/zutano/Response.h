@@ -15,29 +15,28 @@ class Response {
 
   ~Response() = default;
 
-  auto http_code() -> long;
+  auto httpCode() -> long;
 
-  auto error_code() -> int;
+  auto errorCode() -> int;
 
   auto body() -> jsoncons::json;
 
-  auto error_message() -> std::string;
+  auto errorMessage() -> std::string;
 
-  auto is_success() -> bool;
+  auto isSuccess() -> bool;
 
   auto contains(std::vector<int>) -> bool;
 
-  auto Body(jsoncons::json) -> Response;
+  auto body(jsoncons::json) -> Response;
 
-  auto HttpCode(long) -> Response;
+  auto httpCode(long) -> Response;
 
-  auto ErrorCode(int) -> Response;
+  auto errorCode(int) -> Response;
 
-  auto Message(std::string) -> Response;
+  auto message(std::string) -> Response;
 
  private:
-  PrivateImplPtr p_;
+  private_impl_ptr p_;
 };
 
-} // zutano
-
+}  // namespace zutano

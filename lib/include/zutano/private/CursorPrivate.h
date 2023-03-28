@@ -19,8 +19,6 @@ class CursorPimpl : public PrivateImpl {
   jsoncons::json stats_;
   std::vector<jsoncons::json> rows_;
 
-  static inline auto Pimpl(const std::shared_ptr<PrivateImpl> &p) {
-	return std::dynamic_pointer_cast<CursorPimpl>(p);
-  }
+  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<CursorPimpl>(p); }
 };
-} // zutano
+}  // namespace zutano::pimp
