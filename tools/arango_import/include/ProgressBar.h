@@ -42,20 +42,20 @@
 #include <string>
 #include <stdexcept>
 
-class progressbar {
+class ProgressBar {
  public:
   // default destructor
-  ~progressbar() = default;
+  ~ProgressBar() = default;
 
   // delete everything else
-  progressbar(progressbar const&) = delete;
-  progressbar& operator=(progressbar const&) = delete;
-  progressbar(progressbar&&) = delete;
-  progressbar& operator=(progressbar&&) = delete;
+  ProgressBar(ProgressBar const&) = delete;
+  ProgressBar& operator=(ProgressBar const&) = delete;
+  ProgressBar(ProgressBar&&) = delete;
+  ProgressBar& operator=(ProgressBar&&) = delete;
 
   // default constructor, must call set_niter later
-  inline progressbar();
-  inline progressbar(int n, bool showbar = true, std::ostream& out = std::cerr);
+  inline ProgressBar();
+  inline ProgressBar(int n, bool showbar = true, std::ostream& out = std::cerr);
 
   // reset bar to use it again
   inline void reset();
@@ -88,7 +88,7 @@ class progressbar {
   std::ostream& output;
 };
 
-inline progressbar::progressbar()
+inline ProgressBar::ProgressBar()
     : progress(0),
       n_cycles(0),
       last_perc(0),
@@ -100,7 +100,7 @@ inline progressbar::progressbar()
       closing_bracket_char("]"),
       output(std::cerr) {}
 
-inline progressbar::progressbar(int n, bool showbar, std::ostream& out)
+inline ProgressBar::ProgressBar(int n, bool showbar, std::ostream& out)
     : progress(0),
       n_cycles(n),
       last_perc(0),
@@ -112,19 +112,19 @@ inline progressbar::progressbar(int n, bool showbar, std::ostream& out)
       closing_bracket_char("]"),
       output(out) {}
 
-inline void progressbar::reset() {
+inline void ProgressBar::reset() {
   progress = 0, update_is_called = false;
   last_perc = 0;
   return;
 }
 
-inline void progressbar::set_niter(int niter) {
+inline void ProgressBar::set_niter(int niter) {
   if (niter <= 0) throw std::invalid_argument("progressbar::set_niter: number of iterations null or negative");
   n_cycles = niter;
   return;
 }
 
-inline void progressbar::update() {
+inline void ProgressBar::update() {
   if (n_cycles == 0) throw std::runtime_error("progressbar::update: number of cycles not set");
 
   if (!update_is_called) {
