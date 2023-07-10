@@ -1,0 +1,45 @@
+{
+  "system":{
+    "version":"3.10.0",
+    "deployment":"Local",
+    "cleanup":true,
+    "agency":3,
+    "coordinators":3,
+    "dbservers":4
+  },
+  "database":{
+    "name":"test",
+    "replication_factor":3,
+    "write_concern":1,
+    "collections":{
+      "count":10,
+      "naming_schema":"collection_{id}",
+      "sharding":[
+        10,
+        100
+      ]
+    }
+  },
+  "data":{
+    "documents":{
+      "fields":5,
+      "count":{
+        "from": 1000000,
+        "to": 2000000
+      },
+      "size":{
+        "from":500,
+        "to": 1000
+      },
+      "types":[
+        "String",
+        "Integer",
+        "Float",
+        "Boolean",
+        "Date"
+      ]
+    }
+  },
+  "test":{
+  }
+}

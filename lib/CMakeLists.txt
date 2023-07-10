@@ -35,14 +35,16 @@ add_library(zutano SHARED
         include/zutano/input/IndexInput.h
         src/Cursor.cpp include/zutano/Cursor.h)
 
+add_library(zutano::zutano ALIAS zutano)
+
 target_link_libraries(zutano PRIVATE
         cpr::cpr
-        )
+)
 
 target_link_libraries(zutano PUBLIC
         jsoncons
-        )
+)
 
 target_include_directories(zutano PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include/
-        )
+)

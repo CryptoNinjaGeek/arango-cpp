@@ -18,7 +18,6 @@ inline std::string rtrim(const std::string& s) {
 }
 
 inline std::string trim(const std::string& s) { return rtrim(ltrim(s)); }
-
 inline std::string toString(bool b) { return b ? "true" : "false"; }
 
 inline bool replace(std::string& str, const std::string& from, const std::string& to) {
@@ -50,5 +49,9 @@ inline std::vector<std::string> split(std::string str, char sep) {
   return strings;
 }
 
-typedef std::map<std::string, std::variant<std::string, bool, int, char, double, long, std::vector<std::string>>> to_json;
+typedef std::map<std::string, std::string> string_map;
+
+typedef std::map<std::string,
+                 std::variant<std::string, bool, int, char, double, long, std::vector<std::string>, std::map<std::string, std::string>>>
+    to_json;
 }  // namespace zutano::tools
