@@ -51,9 +51,26 @@ auto ArangoBench::run() -> bool {
 auto ArangoBench::shutdown() -> bool {
   docker::Controller controller;
 
-  auto filter = to_json{{"label", "arango_bench"}};
+  auto label = json::parse(R"({
+    "label" : {
+      "arango_bench" : true
+    }
+  }
+  )");
 
-  controller.list_containers({.all = true, .filters = filter});
+  auto containers = controller.list_containers({.all = true, .filters = label});
+  for (auto container_id : containers) {
+    controller.remove_container(container_id);
+  }
+
+  auto networks = controller.list_networks({.all = true, .filters = label});
+  for (auto networks_id : networks) {
+    controller.remove_network(networks_id);
+  }
+  auto volumes = controller.list_volumes({.all = true, .filters = label});
+  for (auto volumes_id : volumes) {
+    controller.remove_volume(volumes_id);
+  }
 
   return true;
 }
@@ -61,8 +78,11 @@ auto ArangoBench::shutdown() -> bool {
 auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
   docker::Controller controller;
   unsigned short start_port = 5700;
+  std::map<std::string, std::string> labels;
 
-  auto network_id = controller.create_network({.name = "arango_graph", .check_duplicate = false});
+  labels["arango_bench"] = true;
+
+  auto network_id = controller.create_network({.name = "arango_graph", .check_duplicate = false, .labels = labels});
   auto agency_count = system.get_value_or<int>("agency", 1);
   auto dbserver_count = system.get_value_or<int>("dbservers", 1);
   auto coordinators_count = system.get_value_or<int>("coordinators", 1);
@@ -134,7 +154,7 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
   std::map<std::string, std::string> labels;
   std::vector<std::string> enviroment;
 
-  labels["app"] = "arango_bench";
+  labels["arango_bench"] = true;
   labels["name"] = input.name;
 
   command.push_back("--server.authentication=false");
@@ -145,7 +165,7 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
 
   enviroment.push_back("ARANGO_NO_AUTH=1");
 
-  auto volume_id = controller.create_volume({.name = input.name});
+  auto volume_id = controller.create_volume({.name = input.name, .labels = labels});
   auto container_id = controller.create_container({.name = input.name,
                                                    .image = input.image,
                                                    .labels = labels,

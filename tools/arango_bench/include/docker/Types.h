@@ -8,10 +8,12 @@ namespace docker {
 struct CreateNetworkInput {
   std::string name;
   std::optional<bool> check_duplicate;
+  std::optional<std::map<std::string, std::string>> labels;
 };
 
 struct CreateVolumeInput {
   std::string name;
+  std::optional<std::map<std::string, std::string>> labels;
 };
 
 struct PortMappingInput {
@@ -42,6 +44,20 @@ struct ListContainerInput {
   jsoncons::json filters;
 };
 
-enum class RequestType { POST, GET };
+struct ListNetworkInput {
+  bool all{false};
+  int limit{1000};
+  bool size{false};
+  jsoncons::json filters;
+};
+
+struct ListVolumeInput {
+  bool all{false};
+  int limit{1000};
+  bool size{false};
+  jsoncons::json filters;
+};
+
+enum class RequestType { POST, GET, DELETE };
 
 }  // namespace docker

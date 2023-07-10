@@ -18,6 +18,10 @@ auto Controller::create_network(CreateNetworkInput input) -> std::string {
       {"CheckDuplicate", input.check_duplicate.value_or(false)},
   };
 
+  if (input.labels) {
+    data.merge(to_json{{"Labels", input.labels.value()}});
+  }
+
   auto response = send_request(RequestType::POST, "/networks/create", data);
 
   return response.get_value_or<std::string>("Id", "");
@@ -25,6 +29,10 @@ auto Controller::create_network(CreateNetworkInput input) -> std::string {
 
 auto Controller::create_volume(CreateVolumeInput input) -> std::string {
   jsoncons::json data = to_json{{"name", input.name}};
+
+  if (input.labels) {
+    data.merge(to_json{{"Labels", input.labels.value()}});
+  }
 
   auto response = send_request(RequestType::POST, "/volumes/create", data);
 
@@ -56,6 +64,8 @@ auto Controller::create_container(CreateContainerInput input) -> std::string {
  \"PortBindings\" : {\"8529/tcp\" : [ {\"HostPort\" : \"%ld\"}]}, \
  \"Binds\": [\"%s\"]}}",
       input.port, input.volume.c_str());
+
+  std::cout << data.to_string() << std::endl;
 
   try {
     data.merge(jsoncons::json::parse(txt));
@@ -117,9 +127,10 @@ auto Controller::send_request(RequestType request_type, std::string path, jsonco
     case RequestType::POST:
       r = session.Post();
       break;
+    case RequestType::DELETE:
+      r = session.Delete();
+      break;
   }
-
-  std::cout << r.text << std::endl;
 
   jsoncons::json j;
   if (not r.text.empty()) j = jsoncons::json::parse(r.text);
@@ -129,24 +140,90 @@ auto Controller::send_request(RequestType request_type, std::string path, jsonco
 
 auto Controller::list_containers(ListContainerInput input) -> std::vector<std::string> {
   std::vector<std::pair<std::string, std::string>> parameters;
+  std::vector<std::string> id_list;
 
   parameters.push_back(std::pair<std::string, std::string>("all", std::to_string(input.all)));
   parameters.push_back(std::pair<std::string, std::string>("limit", std::to_string(input.limit)));
   parameters.push_back(std::pair<std::string, std::string>("size", std::to_string(input.size)));
   parameters.push_back(std::pair<std::string, std::string>("filters", input.filters.to_string()));
 
-  {
-    "name" : { "MyNetwork" : true }
-  }
-  "
-
-      std::cout
-      << input.filters.to_string() << std::endl;
   auto response = send_request(RequestType::GET, "/containers/json", {}, parameters);
 
-  return {};
+  if (response.is_array()) {
+    for (const auto& item : response.array_range()) {
+      auto id = item.get_value_or<std::string>("Id", "");
+      if (!id.empty()) id_list.push_back(id);
+    }
+  } else {
+    std::cout << response.to_string() << std::endl;
+  }
+
+  return id_list;
 }
-auto Controller::list_networks() -> std::vector<std::string> { return std::vector<std::string>(); }
-auto Controller::list_volumes() -> std::vector<std::string> { return std::vector<std::string>(); }
+
+auto Controller::list_networks(ListNetworkInput input) -> std::vector<std::string> {
+  std::vector<std::pair<std::string, std::string>> parameters;
+  std::vector<std::string> id_list;
+
+  parameters.push_back(std::pair<std::string, std::string>("filters", input.filters.to_string()));
+
+  auto response = send_request(RequestType::GET, "/networks", {}, parameters);
+
+  if (response.is_array()) {
+    for (const auto& item : response.array_range()) {
+      auto id = item.get_value_or<std::string>("Id", "");
+      if (!id.empty()) id_list.push_back(id);
+    }
+  } else {
+    std::cout << response.to_string() << std::endl;
+  }
+
+  return id_list;
+}
+
+auto Controller::list_volumes(ListVolumeInput input) -> std::vector<std::string> {
+  std::vector<std::pair<std::string, std::string>> parameters;
+  std::vector<std::string> id_list;
+
+  parameters.push_back(std::pair<std::string, std::string>("filters", input.filters.to_string()));
+
+  auto response = send_request(RequestType::GET, "/volumes", {}, parameters);
+
+  try {
+    if (response.contains("Volumes")) {
+      auto volumes = response["Volumes"];
+      if (volumes.is_array()) {
+        for (const auto& item : volumes.array_range()) {
+          auto id = item.get_value_or<std::string>("Name", "");
+          if (!id.empty()) id_list.push_back(id);
+        }
+      } else {
+        std::cout << volumes.to_string() << std::endl;
+      }
+    }
+  } catch (const std::exception& e) {
+    std::cout << e.what() << '\n';
+  }
+
+  return id_list;
+}
+
+auto Controller::remove_container(std::string id) -> bool {
+  auto response = send_request(RequestType::DELETE, arango_bench::tools::string_format("/containers/%s", id.c_str()));
+
+  return !response.contains("Message");
+}
+
+auto Controller::remove_network(std::string id) -> bool {
+  auto response = send_request(RequestType::DELETE, arango_bench::tools::string_format("/networks/%s", id.c_str()));
+
+  return !response.contains("Message");
+}
+
+auto Controller::remove_volume(std::string name) -> bool {
+  auto response = send_request(RequestType::DELETE, arango_bench::tools::string_format("/volumes/%s", name.c_str()));
+
+  return !response.contains("Message");
+}
 
 }  // namespace docker

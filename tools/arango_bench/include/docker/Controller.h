@@ -19,8 +19,12 @@ class Controller {
   auto start_container(std::string) -> bool;
 
   auto list_containers(ListContainerInput) -> std::vector<std::string>;
-  auto list_networks() -> std::vector<std::string>;
-  auto list_volumes() -> std::vector<std::string>;
+  auto list_networks(ListNetworkInput) -> std::vector<std::string>;
+  auto list_volumes(ListVolumeInput) -> std::vector<std::string>;
+
+  auto remove_container(std::string) -> bool;
+  auto remove_network(std::string) -> bool;
+  auto remove_volume(std::string) -> bool;
 
  private:
   auto send_request(RequestType type, std::string path, jsoncons::json data = {},

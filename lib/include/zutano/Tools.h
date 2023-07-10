@@ -1,5 +1,6 @@
 #pragma once
 
+#include <jsoncons/json.hpp>
 #include <string>
 #include <iostream>
 
@@ -49,7 +50,7 @@ inline std::vector<std::string> split(std::string str, char sep) {
   return strings;
 }
 
-typedef std::map<std::string, std::string> string_map;
+typedef std::map<std::string, std::string> value_map;
 
 typedef std::map<std::string,
                  std::variant<std::string, bool, int, char, double, long, std::vector<std::string>, std::map<std::string, std::string>>>
