@@ -59,16 +59,21 @@ auto Controller::create_container(CreateContainerInput input) -> std::string {
     data.merge(to_json{{"Labels", input.labels.value()}});
   }
 
-  auto txt = arango_bench::tools::string_format(
-      "{\"HostConfig\": { \
+  try {
+    if (input.group) {
+      data.merge(
+          jsoncons::json::parse(arango_bench::tools::string_format("{\"HostConfig\": { \
+           \"PortBindings\" : {\"8529/tcp\" : [ {\"HostPort\" : \"%ld\"}]}, \
+           \"GroupAdd\": [\"%s\"],\
+           \"Binds\": [\"%s\"]}}",
+                                                                   input.port, input.group.value().c_str(), input.volume.c_str())));
+    } else {
+      data.merge(
+          jsoncons::json::parse(arango_bench::tools::string_format("{\"HostConfig\": { \
  \"PortBindings\" : {\"8529/tcp\" : [ {\"HostPort\" : \"%ld\"}]}, \
  \"Binds\": [\"%s\"]}}",
-      input.port, input.volume.c_str());
-
-  std::cout << data.to_string() << std::endl;
-
-  try {
-    data.merge(jsoncons::json::parse(txt));
+                                                                   input.port, input.volume.c_str())));
+    }
   } catch (const std::exception& e) {
     std::cout << e.what() << '\n';
   }
@@ -208,22 +213,53 @@ auto Controller::list_volumes(ListVolumeInput input) -> std::vector<std::string>
   return id_list;
 }
 
+auto Controller::stop_container(StopContainerInput input) -> bool {
+  std::vector<std::pair<std::string, std::string>> parameters;
+
+  parameters.push_back(std::pair<std::string, std::string>("t", std::to_string(input.timeout)));
+
+  auto response =
+      send_request(RequestType::POST, arango_bench::tools::string_format("/containers/%s/stop", input.id.c_str()), {}, parameters);
+
+  if (response.contains("message")) {
+    std::cout << response.get_value_or<std::string>("message", "Unknown error") << std::endl;
+
+    return false;
+  } else
+    return true;
+}
+
 auto Controller::remove_container(std::string id) -> bool {
   auto response = send_request(RequestType::DELETE, arango_bench::tools::string_format("/containers/%s", id.c_str()));
 
-  return !response.contains("Message");
+  if (response.contains("message")) {
+    std::cout << response.get_value_or<std::string>("message", "Unknown error") << std::endl;
+
+    return false;
+  } else
+    return true;
 }
 
 auto Controller::remove_network(std::string id) -> bool {
   auto response = send_request(RequestType::DELETE, arango_bench::tools::string_format("/networks/%s", id.c_str()));
 
-  return !response.contains("Message");
+  if (response.contains("message")) {
+    std::cout << response.get_value_or<std::string>("message", "Unknown error") << std::endl;
+
+    return false;
+  } else
+    return true;
 }
 
 auto Controller::remove_volume(std::string name) -> bool {
   auto response = send_request(RequestType::DELETE, arango_bench::tools::string_format("/volumes/%s", name.c_str()));
 
-  return !response.contains("Message");
+  if (response.contains("message")) {
+    std::cout << response.get_value_or<std::string>("message", "Unknown error") << std::endl;
+
+    return false;
+  } else
+    return true;
 }
 
 }  // namespace docker

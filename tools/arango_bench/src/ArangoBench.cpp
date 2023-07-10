@@ -60,14 +60,14 @@ auto ArangoBench::shutdown() -> bool {
 
   auto containers = controller.list_containers({.all = true, .filters = label});
   for (auto container_id : containers) {
-    controller.remove_container(container_id);
+    if (controller.stop_container({.id = container_id, .timeout = 5})) controller.remove_container(container_id);
   }
 
-  auto networks = controller.list_networks({.all = true, .filters = label});
+  auto networks = controller.list_networks({.filters = label});
   for (auto networks_id : networks) {
     controller.remove_network(networks_id);
   }
-  auto volumes = controller.list_volumes({.all = true, .filters = label});
+  auto volumes = controller.list_volumes({.filters = label});
   for (auto volumes_id : volumes) {
     controller.remove_volume(volumes_id);
   }
@@ -167,6 +167,7 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
 
   auto volume_id = controller.create_volume({.name = input.name, .labels = labels});
   auto container_id = controller.create_container({.name = input.name,
+                                                   .group = "arango_bench",
                                                    .image = input.image,
                                                    .labels = labels,
                                                    .command = command,

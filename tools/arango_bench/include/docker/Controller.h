@@ -26,6 +26,8 @@ class Controller {
   auto remove_network(std::string) -> bool;
   auto remove_volume(std::string) -> bool;
 
+  auto stop_container(StopContainerInput) -> bool;
+
  private:
   auto send_request(RequestType type, std::string path, jsoncons::json data = {},
                     std::vector<std::pair<std::string, std::string>> parameters = {}) -> jsoncons::json;

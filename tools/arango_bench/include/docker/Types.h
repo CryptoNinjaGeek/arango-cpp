@@ -26,6 +26,7 @@ struct CreateContainerInput {
   std::string image;
   int port;
   std::string volume;
+  std::optional<std::string> group;
   std::optional<std::string> host_config;
   std::optional<std::vector<std::string>> command;
   std::optional<std::vector<std::string>> enviroment;
@@ -45,17 +46,16 @@ struct ListContainerInput {
 };
 
 struct ListNetworkInput {
-  bool all{false};
-  int limit{1000};
-  bool size{false};
   jsoncons::json filters;
 };
 
 struct ListVolumeInput {
-  bool all{false};
-  int limit{1000};
-  bool size{false};
   jsoncons::json filters;
+};
+
+struct StopContainerInput {
+  std::string id;
+  int timeout{10};
 };
 
 enum class RequestType { POST, GET, DELETE };
