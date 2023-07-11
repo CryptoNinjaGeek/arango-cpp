@@ -1,45 +1,85 @@
 {
-  "system":{
-    "version":"3.10.0",
-    "deployment":"Local",
-    "cleanup":true,
-    "agency":3,
-    "coordinators":3,
-    "dbservers":4
+  "system": {
+    "version": "3.10.0",
+    "deployment": "Local",
+    "cleanup": true,
+    "agency": 3,
+    "coordinators": 3,
+    "dbservers": 4
   },
-  "database":{
-    "name":"test",
-    "replication_factor":3,
-    "write_concern":1,
-    "collections":{
-      "count":10,
-      "naming_schema":"collection_{id}",
-      "sharding":[
+  "database": {
+    "name": "test",
+    "replication_factor": 3,
+    "write_concern": 1,
+    "collections": {
+      "count": 10,
+      "naming_schema": "collection_{id}",
+      "sharding": [
         10,
         100
       ]
     }
   },
-  "data":{
-    "documents":{
-      "fields":5,
-      "count":{
-        "from": 1000000,
-        "to": 2000000
+  "data": {
+    "documents": {
+      "fields": 5,
+      "count": {
+        "from": 100000,
+        "to": 200000
       },
-      "size":{
-        "from":500,
+      "size": {
+        "from": 500,
         "to": 1000
       },
-      "types":[
-        "String",
-        "Integer",
-        "Float",
-        "Boolean",
-        "Date"
+      "content": [
+        {
+          "name": "name",
+          "type": "string",
+          "null_percentage": 10,
+          "length": 32
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "null_percentage": 10,
+          "length_interval": [
+            100,
+            1000
+          ]
+        },
+        {
+          "name": "count",
+          "type": "int",
+          "null_percentage": 30
+        },
+        {
+          "name": "verified",
+          "type": "boolean",
+          "null_percentage": 0
+        },
+        {
+          "name": "firstObject",
+          "type": "object",
+          "null_percentage": 10,
+          "object_content": [
+            {
+              "name": "key1",
+              "type": "string",
+              "null_percentage": 0,
+              "length": 12
+            },
+            {
+              "name": "key2",
+              "type": "int",
+              "null_percentage": 50,
+              "min": 10,
+              "max": 20
+            }
+          ]
+        }
       ]
     }
   },
-  "test":{
+  "test": {
   }
 }

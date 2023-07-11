@@ -19,6 +19,8 @@ class Collection {
 
   ~Collection() = default;
 
+  auto name() -> std::string;
+
   auto truncate() -> bool;
   auto head(jsoncons::json) -> jsoncons::json;
 

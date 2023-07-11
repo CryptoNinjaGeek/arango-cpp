@@ -133,10 +133,7 @@ auto Collection::addInvertedIndex(input::InvertedIndexCreateInput input) -> json
 
 auto Collection::deleteIndex(const std::string& index_name, bool ignore_missing) -> bool {
   auto p = pimp::CollectionPimpl::pimpl(p_);
-  auto r = Request()
-               .method(HttpMethod::DELETE)
-               .database(p->db_.name())
-               .endpoint(std::string("/index/") + p->name_ + "/" + index_name);
+  auto r = Request().method(HttpMethod::DELETE).database(p->db_.name()).endpoint(std::string("/index/") + p->name_ + "/" + index_name);
 
   auto response = p->connection_.sendRequest(r);
   if (response.httpCode() == 1212 and ignore_missing)
@@ -149,8 +146,7 @@ auto Collection::deleteIndex(const std::string& index_name, bool ignore_missing)
 
 auto Collection::loadIndexesIntoMemory() -> bool {
   auto p = pimp::CollectionPimpl::pimpl(p_);
-  auto r =
-      Request().method(HttpMethod::PUT).database(p->db_.name()).collection(p->name_).endpoint("loadIndexesIntoMemory");
+  auto r = Request().method(HttpMethod::PUT).database(p->db_.name()).collection(p->name_).endpoint("loadIndexesIntoMemory");
 
   auto response = p->connection_.sendRequest(r);
   if (not response.isSuccess()) throw ServerError(response.errorMessage(), response.errorCode());
@@ -174,6 +170,10 @@ auto Collection::addIndex(const jsoncons::json& data) -> jsoncons::json {
     throw ServerError(response.errorMessage(), response.errorCode());
 
   return response.body();
+}
+auto Collection::name() -> std::string {
+  auto p = pimp::CollectionPimpl::pimpl(p_);
+  return p->name_;
 }
 
 }  // namespace zutano

@@ -24,6 +24,13 @@ auto Controller::create_network(CreateNetworkInput input) -> std::string {
 
   auto response = send_request(RequestType::POST, "/networks/create", data);
 
+  auto error = response.get_value_or<std::string>("message", "");
+
+  if (!error.empty()) {
+    std::cout << "Error: " << error << std::endl;
+    return {};
+  }
+
   return response.get_value_or<std::string>("Id", "");
 }
 
@@ -60,20 +67,11 @@ auto Controller::create_container(CreateContainerInput input) -> std::string {
   }
 
   try {
-    if (input.group) {
-      data.merge(
-          jsoncons::json::parse(arango_bench::tools::string_format("{\"HostConfig\": { \
-           \"PortBindings\" : {\"8529/tcp\" : [ {\"HostPort\" : \"%ld\"}]}, \
-           \"GroupAdd\": [\"%s\"],\
-           \"Binds\": [\"%s\"]}}",
-                                                                   input.port, input.group.value().c_str(), input.volume.c_str())));
-    } else {
-      data.merge(
-          jsoncons::json::parse(arango_bench::tools::string_format("{\"HostConfig\": { \
+    data.merge(
+        jsoncons::json::parse(arango_bench::tools::string_format("{\"HostConfig\": { \
  \"PortBindings\" : {\"8529/tcp\" : [ {\"HostPort\" : \"%ld\"}]}, \
  \"Binds\": [\"%s\"]}}",
-                                                                   input.port, input.volume.c_str())));
-    }
+                                                                 input.port, input.volume.c_str())));
   } catch (const std::exception& e) {
     std::cout << e.what() << '\n';
   }

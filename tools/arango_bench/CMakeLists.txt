@@ -26,6 +26,8 @@ add_executable(arango_bench
         include/docker/Types.h
         src/IController.cpp
         include/IController.h
+        src/JsonGenerator.cpp
+        include/JsonGenerator.h
 )
 target_link_libraries(arango_bench PUBLIC zutano cxxopts cpr::cpr)
 target_include_directories(arango_bench PRIVATE ./include ./include/docker)

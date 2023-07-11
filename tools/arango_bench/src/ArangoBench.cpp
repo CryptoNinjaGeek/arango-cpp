@@ -2,11 +2,13 @@
 #include <zutano/zutano.h>
 #include <cxxopts.hpp>
 #include <iostream>
+#include <zutano/zutano.h>
 #include <jsoncons/json.hpp>
 #include <fstream>
 #include <stdarg.h>  // For va_start, etc.
 #include <memory>    // For std::unique_ptr
 
+#include "JsonGenerator.h"
 #include "ProgressBar.h"
 #include "Input.h"
 #include "Tools.h"
@@ -20,7 +22,10 @@ using namespace jsoncons::literals;
 
 namespace arango_bench {
 
-ArangoBench::ArangoBench(Input input) { input_ = input; }
+ArangoBench::ArangoBench(Input input) {
+  input_ = input;
+  rand_source_ = std::mt19937(time(0));
+}
 
 auto ArangoBench::parseConfigFile() -> bool {
   try {
@@ -40,10 +45,17 @@ auto ArangoBench::run() -> bool {
 
   auto system = config_["system"];
 
-  if (system.get_value_or<std::string>("deployment", "Local") == "ArangoGraph")
-    setupArangoGraph(system);
-  else
-    setupDocker(system);
+  if (system.get_value_or<std::string>("deployment", "Local") == "ArangoGraph") {
+    if (!setupArangoGraph(system)) return false;
+  } else {
+    if (!setupDocker(system)) return false;
+  }
+
+  auto database = config_["database"];
+  auto data = config_["data"];
+  auto test = config_["test"];
+
+  if (createSchema(database) && createData(data)) return runTests(test);
 
   return true;
 }
@@ -79,6 +91,7 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
   docker::Controller controller;
   unsigned short start_port = 5700;
   std::map<std::string, std::string> labels;
+  std::vector<std::string> coordinators;
 
   labels["arango_bench"] = true;
 
@@ -87,7 +100,10 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
   auto dbserver_count = system.get_value_or<int>("dbservers", 1);
   auto coordinators_count = system.get_value_or<int>("coordinators", 1);
 
-  if (network_id.empty()) return false;
+  if (network_id.empty()) {
+    return false;
+  }
+  std::cout << "Created network => " << network_id << std::endl;
 
   for (int n = 0; n < agency_count; n++) {
     std::vector<std::string> command;
@@ -106,6 +122,7 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
          .network_id = network_id,
          .image = tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest"))});
   }
+  std::cout << "Created agency => " << agency_count << std::endl;
 
   for (int n = 0; n < dbserver_count; n++) {
     std::vector<std::string> command;
@@ -125,6 +142,7 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
          .network_id = network_id,
          .image = tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest"))});
   }
+  std::cout << "Created db servers => " << dbserver_count << std::endl;
 
   for (int n = 0; n < coordinators_count; n++) {
     std::vector<std::string> command;
@@ -137,6 +155,8 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
       command.push_back(tools::string_format("--cluster.agency-endpoint=tcp://agent%ld", no));
     }
 
+    coordinators.push_back(tools::string_format("http://localhost:%ld/", start_port));
+
     startDockerContainer(
         {.name = name,
          .command = command,
@@ -144,7 +164,17 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
          .network_id = network_id,
          .image = tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest"))});
   }
-  return false;
+  std::cout << "Created coordinators => " << coordinators_count << std::endl;
+
+  connection_ = Connection().hosts(coordinators);
+
+#ifdef DEBUG_OUTPUT
+  for (auto host : coordinators) {
+    std::cout << host << std::endl;
+  }
+#endif
+
+  return true;
 }
 
 auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
@@ -182,8 +212,79 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
 }
 
 auto ArangoBench::setupArangoGraph(jsoncons::json&) -> bool { return false; }
-auto ArangoBench::createSchema() -> bool { return false; }
-auto ArangoBench::createData() -> bool { return false; }
-auto ArangoBench::runTests() -> bool { return false; }
+
+auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
+  if (!connection_.ping()) {
+    std::cout << "ping'ed failed" << std::endl;
+    return false;
+  } else
+    std::cout << "ping'ed ok" << std::endl;
+
+  auto sys_db = connection_.database("_system");
+  auto db_name = json.get_value_or<std::string>("name", "demo");
+
+  auto db = sys_db.createDatabase({.name = db_name,
+                                   .replication_factor = json.get_value_or<int>("replication_factor", 1),
+                                   .sharding = "flexible",
+                                   .write_concern = json.get_value_or<int>("write_concern", 1),
+                                   .allow_conflict = true});
+
+  database_ = connection_.database(db_name);
+
+  auto collections = json.get_value_or<jsoncons::json>("collections", jsoncons::json());
+
+  if (collections.is_object()) {
+    auto count = collections.get_value_or<int>("count", 1);
+    auto naming_schema = collections.get_value_or<std::string>("naming_schema", "collection{id}");
+    auto sharding_interval = collections.get_value_or<std::pair<int, int>>("sharding", std::pair<int, int>(1, 1));
+
+    for (int no = 1; no <= count; no++) {
+      auto name = naming_schema;
+      name = std::regex_replace(name, std::regex("\\{id\\}"), std::to_string(no));
+      auto sharding = random_interval(sharding_interval);
+      auto collection = database_.createCollection({.name = name, .shard_count = sharding});
+      collections_.push_back(collection);
+    }
+  }
+
+  return true;
+}
+
+auto ArangoBench::createData(jsoncons::json& json) -> bool {
+  auto documents = json.get_value_or<jsoncons::json>("documents", jsoncons::json());
+  auto count_interval = documents.get_value_or<std::pair<int, int>>("count", std::pair<int, int>(1, 1));
+  auto size_interval = documents.get_value_or<std::pair<int, int>>("size", std::pair<int, int>(1, 1));
+  auto content = documents.get_value_or<jsoncons::json>("content", jsoncons::json());
+
+  jsoncons::json array(jsoncons::json_array_arg);
+
+  int step = 1000;
+  for (auto collection : collections_) {
+    auto count = random_interval(count_interval);
+    auto size = random_interval(size_interval);
+
+    std::cout << "Collection: " << collection.name() << " , Size: " << count << std::endl;
+
+    while (count > 0) {
+      auto request = 0;
+      if (count > step)
+        request = step;
+      else
+        request = count;
+
+      auto array = build_array(content, request);
+      collection.insert(array, {.sync = false});
+
+      count -= request;
+    }
+  }
+
+  return true;
+}
+auto ArangoBench::runTests(jsoncons::json&) -> bool { return false; }
+
+auto ArangoBench::random_interval(std::pair<int, int>& interval) -> int {
+  return (rand_source_() % (interval.second - interval.first + 1)) + interval.first;
+}
 
 }  // namespace arango_bench
