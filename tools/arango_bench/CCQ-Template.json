@@ -22,14 +22,9 @@
   },
   "data": {
     "documents": {
-      "fields": 5,
       "count": {
-        "from": 100000,
-        "to": 200000
-      },
-      "size": {
-        "from": 500,
-        "to": 1000
+        "from": 10000000,
+        "to": 20000000
       },
       "content": [
         {

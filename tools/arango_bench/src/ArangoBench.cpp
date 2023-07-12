@@ -253,7 +253,6 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
 auto ArangoBench::createData(jsoncons::json& json) -> bool {
   auto documents = json.get_value_or<jsoncons::json>("documents", jsoncons::json());
   auto count_interval = documents.get_value_or<std::pair<int, int>>("count", std::pair<int, int>(1, 1));
-  auto size_interval = documents.get_value_or<std::pair<int, int>>("size", std::pair<int, int>(1, 1));
   auto content = documents.get_value_or<jsoncons::json>("content", jsoncons::json());
 
   jsoncons::json array(jsoncons::json_array_arg);
@@ -261,7 +260,6 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
   int step = 1000;
   for (auto collection : collections_) {
     auto count = random_interval(count_interval);
-    auto size = random_interval(size_interval);
 
     std::cout << "Collection: " << collection.name() << " , Size: " << count << std::endl;
 
