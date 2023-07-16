@@ -77,7 +77,7 @@ auto Controller::create_container(CreateContainerInput input) -> std::string {
   }
 
   auto response = send_request(RequestType::POST, "/containers/create", data, param);
-
+  
   return response.get_value_or<std::string>("Id", "");
 }
 
@@ -136,7 +136,11 @@ auto Controller::send_request(RequestType request_type, std::string path, jsonco
   }
 
   jsoncons::json j;
-  if (not r.text.empty()) j = jsoncons::json::parse(r.text);
+  try {
+    if (not r.text.empty()) j = jsoncons::json::parse(r.text);
+  } catch (const std::exception& e) {
+    std::cout << r.text << std::endl;
+  }
 
   return j;
 }
@@ -258,6 +262,39 @@ auto Controller::remove_volume(std::string name) -> bool {
     return false;
   } else
     return true;
+}
+
+auto Controller::get_image_list() -> std::vector<std::string> {
+  std::vector<std::string> image_list;
+  auto response = send_request(RequestType::GET, "/images/json");
+
+  if (response.is_array()) {
+    for (const auto& item : response.array_range()) {
+      if (item.contains("RepoTags") && item["RepoTags"].is_array()) {
+        for (const auto& tag : item["RepoTags"].array_range()) {
+          image_list.push_back(tag.to_string());
+        }
+      }
+    }
+  } else {
+    std::cout << response.to_string() << std::endl;
+  }
+
+  return image_list;
+}
+
+auto Controller::pull_image(std::string image) -> bool {
+  std::vector<std::pair<std::string, std::string>> param;
+
+  param.push_back(std::pair<std::string, std::string>("fromImage", image));
+
+  auto response = send_request(RequestType::POST, "/images/create", {}, param);
+
+  std::cout << response.to_string() << std::endl;
+
+  auto error = response.get_value_or<std::string>("message", "");
+
+  return error.empty();
 }
 
 }  // namespace docker

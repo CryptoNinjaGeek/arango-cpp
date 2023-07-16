@@ -29,7 +29,9 @@ class ArangoBench {
   inline auto random_interval(std::pair<int, int>&) -> int;
 
  private:
-  std::vector<zutano::Collection> collections_;
+  std::vector<zutano::Collection> document_collections_;
+  std::map<std::string, zutano::Collection> edge_collections_;
+  std::map<std::string, std::vector<std::string>> collection_ids_;
   zutano::Connection connection_;
   zutano::Database database_;
   Input input_;

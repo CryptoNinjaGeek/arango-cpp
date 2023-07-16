@@ -29,7 +29,7 @@ auto main() -> int {
     for (int no = 1; no < 10; no++) {
       array.push_back(to_json{{"name", std::string("josh-") + std::to_string(no)}, {"age", no}});
     }
-    array = students.insert(array, {.sync = false});
+    students.insert(array, {.sync = false});
 
     auto cursor = db.execute({.query = "FOR doc IN students RETURN doc", .count = true, .batch_size = 2});
 

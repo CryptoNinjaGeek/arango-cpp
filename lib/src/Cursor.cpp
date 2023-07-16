@@ -58,9 +58,9 @@ auto Cursor::update(jsoncons::json data) -> bool {
 
   if (result.is_array()) {
     for (const auto& row : result.array_range()) p->rows_.emplace_back(row);
+    return true;
   }
-
-  return true;
+  return false;
 }
 
 auto Cursor::count() -> long {
@@ -116,8 +116,7 @@ auto Cursor::next() -> jsoncons::json {
 auto Cursor::fetch() -> bool {
   auto p = pimp::CursorPimpl::pimpl(p_);
 
-  auto r =
-      Request().method(HttpMethod::PUT).database(p->db_name_).handle(p->type_).id(p->id_).endpoint("/{handle}/{id}");
+  auto r = Request().method(HttpMethod::PUT).database(p->db_name_).handle(p->type_).id(p->id_).endpoint("/{handle}/{id}");
 
   auto response = p->connection_.sendRequest(r);
 
@@ -134,8 +133,7 @@ auto Cursor::close(bool ignore_missing) -> bool {
 
   if (p->id_.empty()) return true;
 
-  auto r =
-      Request().method(HttpMethod::DELETE).database(p->db_name_).handle(p->type_).id(p->id_).endpoint("/{handle}/{id}");
+  auto r = Request().method(HttpMethod::DELETE).database(p->db_name_).handle(p->type_).id(p->id_).endpoint("/{handle}/{id}");
 
   auto response = p->connection_.sendRequest(r);
   if (response.contains({401, 403}))

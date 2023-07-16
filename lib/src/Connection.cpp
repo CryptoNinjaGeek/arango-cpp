@@ -31,14 +31,14 @@ class ConnectionPimpl : public PrivateImpl {
   static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<ConnectionPimpl>(p); }
 
   auto host() -> std::string {
-    if (endpoints_.size())
+    if (!endpoints_.empty())
       return this->endpoints_.at(last_++ % this->endpoints_.size());
     else
       return {};
   }
 
   auto debug() -> void {
-    for (auto host : endpoints_) {
+    for (const auto& host : endpoints_) {
       std::cout << host << std::endl;
     }
   }
@@ -147,7 +147,7 @@ auto Connection::sendRequest(Request request) -> Response {
   if (!p->certificate_.empty()) session.SetSslOptions(cpr::Ssl(cpr::ssl::PinnedPublicKey{p->certificate_.c_str()}));
 
   cpr::Response r;
-  bool retry{false};
+  bool retry;
   int retry_cnt{0};
   std::vector<int> retry_codes{0, 503};
 

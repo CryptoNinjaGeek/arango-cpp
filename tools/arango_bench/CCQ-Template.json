@@ -1,6 +1,6 @@
 {
   "system": {
-    "version": "3.10.0",
+    "version": "3.11.1",
     "deployment": "Local",
     "cleanup": true,
     "agency": 3,
@@ -11,31 +11,48 @@
     "name": "test",
     "replication_factor": 3,
     "write_concern": 1,
-    "collections": {
+    "documents": {
       "count": 10,
       "naming_schema": "collection_{id}",
       "sharding": [
         10,
         100
       ]
+    },
+    "graphs": {
+      "count": 2,
+      "naming_schema": "edges_{id}",
+      "sharding": [
+        2,
+        4
+      ]
     }
   },
   "data": {
     "documents": {
       "count": {
-        "from": 10000000,
-        "to": 20000000
+        "from": 100000,
+        "to": 200000
       },
       "content": [
         {
           "name": "name",
-          "type": "string",
+          "type": "static",
+          "special_type": "name",
           "null_percentage": 10,
           "length": 32
         },
         {
+          "name": "country",
+          "type": "static",
+          "special_type": "country",
+          "null_percentage": 10,
+          "length": 1
+        },
+        {
           "name": "description",
-          "type": "string",
+          "type": "static",
+          "special_type": "words",
           "null_percentage": 10,
           "length_interval": [
             100,
@@ -73,7 +90,29 @@
           ]
         }
       ]
-    }
+    },
+    "graphs": [
+      {
+        "name": "edges_1",
+        "count": {
+          "from": 10000,
+          "to": 20000
+        },
+        "allow_collisions": false,
+        "from": "collection_1",
+        "to": "collection_2"
+      },
+      {
+        "name": "edges_2",
+        "count": {
+          "from": 1000000,
+          "to": 2000000
+        },
+        "allow_collisions": false,
+        "from": "collection_1",
+        "to": "collection_5"
+      }
+    ]
   },
   "test": {
   }

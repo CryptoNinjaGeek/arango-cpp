@@ -10,14 +10,21 @@
 #include <cstring>
 #include <sstream>
 
+#include "static_countries.h"
+#include "static_names.h"
+#include "static_words.h"
+
 const std::string letterBytes = "abcde fghij klmn opqrs tuvwx yz";
 const int letterIdxBits = 6;
 const int letterIdxMask = (1 << letterIdxBits) - 1;
 const int letterIdxMax = 63 / letterIdxBits;
 
+enum class SpecialType { country, name, words };
+
 struct GeneratorJSON {
   std::string name;
   std::string type;
+  SpecialType special_type;
   int length{0};
   std::pair<int, int> length_interval;
   std::optional<int> null_percentage;
@@ -75,29 +82,60 @@ class StringGenerator : public EmptyGenerator {
     ss << '"';
     ss << str;
     ss << '"';
+  }
+};
 
-    /*    std::string by(real_length + 2, ' ');
-        by[0] = '"';
-        int last = 0;
-        for (int i = real_length, cache, remain; i > 0;) {
-          if (remain == 0) {
-            cache = r();
-            remain = letterIdxMax;
-          }
-          if (!(i % last)) {
-            by[i] = ' ';
-            i--;
-          } else if (int idx = cache & letterIdxMask; idx < letterBytes.length()) {
-            by[i] = letterBytes[idx];
-            last = by[i];
-            i--;
-          }
-          cache >>= letterIdxBits;
-          remain--;
-        }
-        by[real_length] = '"';
-ss << by;
-        */
+class StaticGenerator : public EmptyGenerator {
+ public:
+  int length;
+  std::pair<int, int> length_interval;
+  SpecialType special_type;
+
+  StaticGenerator(std::string k, int np, SpecialType special_type, int length, std::pair<int, int> interval)
+      : EmptyGenerator(k, np), length(length), length_interval(interval), special_type(special_type) {}
+
+  void CountryValue(std::mt19937& engine, std::stringstream& stringstream) {
+    auto index = engine() % COUNTRIES.size();
+    stringstream << '"';
+    stringstream << COUNTRIES[index];
+    stringstream << '"';
+  }
+
+  void NameValue(std::mt19937& engine, std::stringstream& stringstream) {
+    auto index = engine() % NAMES.size();
+    stringstream << '"';
+    stringstream << NAMES[index];
+    stringstream << '"';
+  }
+
+  void WordsValue(std::mt19937& engine, std::stringstream& stringstream) {
+    auto real_length = length;
+    if (!real_length) real_length = (engine() % (length_interval.second - length_interval.first)) + length_interval.first;
+
+    stringstream << '"';
+
+    for (int i = 0; i < real_length; i++) {
+      auto index = engine() % WORDS.size();
+      stringstream << WORDS[index];
+      if (i != real_length - 1) {
+        stringstream << " ";
+      }
+    }
+    stringstream << '"';
+  }
+
+  void Value(std::mt19937& r, std::stringstream& ss) {
+    switch (special_type) {
+      case SpecialType::country:
+        CountryValue(r, ss);
+        break;
+      case SpecialType::name:
+        NameValue(r, ss);
+        break;
+      case SpecialType::words:
+        WordsValue(r, ss);
+        break;
+    }
   }
 };
 
@@ -166,6 +204,8 @@ Generator* NewGenerator(std::string k, GeneratorJSON& v) {
   EmptyGenerator* eg = new EmptyGenerator(k, null_percentage);
   if (v.type == "string") {
     return new StringGenerator(k, null_percentage, v.length, v.length_interval);
+  } else if (v.type == "static") {
+    return new StaticGenerator(k, null_percentage, v.special_type, v.length, v.length_interval);
   } else if (v.type == "int") {
     return new IntGenerator(k, null_percentage, 2, 4);
   } else if (v.type == "boolean") {
@@ -193,7 +233,9 @@ ArrayGenerator baseGenerator(int count, std::vector<GeneratorJSON>& content) {
   return ArrayGenerator("", 0, count, new ObjectGenerator("", 0, NewGeneratorsFromMap(content)));
 }
 
-JSONCONS_N_MEMBER_TRAITS(GeneratorJSON, 2, name, type, null_percentage, length, length_interval, min, max, size, object_content)
+JSONCONS_ENUM_TRAITS(SpecialType, country, name, words)
+JSONCONS_N_MEMBER_TRAITS(GeneratorJSON, 2, name, type, special_type, null_percentage, length, length_interval, min, max, size,
+                         object_content)
 
 namespace arango_bench {
 
@@ -210,6 +252,7 @@ jsoncons::json build_array(jsoncons::json& config, int& document_count) {
 
   std::stringstream ss;
   generator.Value(randSource, ss);
+
   auto result = jsoncons::json::parse(ss.str());
 
   return result;

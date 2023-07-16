@@ -22,6 +22,8 @@ using namespace jsoncons::literals;
 
 namespace arango_bench {
 
+static int BATCH_SIZE = 1000;
+
 ArangoBench::ArangoBench(Input input) {
   input_ = input;
   rand_source_ = std::mt19937(time(0));
@@ -94,6 +96,13 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
   std::vector<std::string> coordinators;
 
   labels["arango_bench"] = true;
+
+  auto images = controller.get_image_list();
+  if (!std::count(images.begin(), images.end(),
+                  tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest")))) {
+    std::cout << "Pulling image arangodb/arangodb:" << system.get_value_or<std::string_view>("version", "latest") << std::endl;
+    controller.pull_image(tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest")));
+  }
 
   auto network_id = controller.create_network({.name = "arango_graph", .check_duplicate = false, .labels = labels});
   auto agency_count = system.get_value_or<int>("agency", 1);
@@ -231,7 +240,7 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
 
   database_ = connection_.database(db_name);
 
-  auto collections = json.get_value_or<jsoncons::json>("collections", jsoncons::json());
+  auto collections = json.get_value_or<jsoncons::json>("documents", jsoncons::json());
 
   if (collections.is_object()) {
     auto count = collections.get_value_or<int>("count", 1);
@@ -243,7 +252,24 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
       name = std::regex_replace(name, std::regex("\\{id\\}"), std::to_string(no));
       auto sharding = random_interval(sharding_interval);
       auto collection = database_.createCollection({.name = name, .shard_count = sharding});
-      collections_.push_back(collection);
+      document_collections_.push_back(collection);
+    }
+  }
+
+  auto graphs = json.get_value_or<jsoncons::json>("graphs", jsoncons::json());
+
+  if (graphs.is_object()) {
+    auto count = graphs.get_value_or<int>("count", 1);
+    auto naming_schema = graphs.get_value_or<std::string>("naming_schema", "collection{id}");
+    auto sharding_interval = graphs.get_value_or<std::pair<int, int>>("sharding", std::pair<int, int>(1, 1));
+
+    for (int no = 1; no <= count; no++) {
+      auto name = naming_schema;
+      name = std::regex_replace(name, std::regex("\\{id\\}"), std::to_string(no));
+      auto sharding = random_interval(sharding_interval);
+      auto collection = database_.createCollection({.name = name, .shard_count = sharding, .edge = true});
+      std::cout << "Created edge collection: " << name << std::endl;
+      edge_collections_.insert_or_assign(name, collection);
     }
   }
 
@@ -252,29 +278,92 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
 
 auto ArangoBench::createData(jsoncons::json& json) -> bool {
   auto documents = json.get_value_or<jsoncons::json>("documents", jsoncons::json());
+  auto graphs = json.get_value_or<jsoncons::json>("graphs", jsoncons::json());
   auto count_interval = documents.get_value_or<std::pair<int, int>>("count", std::pair<int, int>(1, 1));
   auto content = documents.get_value_or<jsoncons::json>("content", jsoncons::json());
 
-  jsoncons::json array(jsoncons::json_array_arg);
-
-  int step = 1000;
-  for (auto collection : collections_) {
+  for (auto collection : document_collections_) {
     auto count = random_interval(count_interval);
 
     std::cout << "Collection: " << collection.name() << " , Size: " << count << std::endl;
 
+    std::vector<std::string> ids;
     while (count > 0) {
       auto request = 0;
-      if (count > step)
-        request = step;
+      if (count > BATCH_SIZE)
+        request = BATCH_SIZE;
       else
         request = count;
 
       auto array = build_array(content, request);
-      collection.insert(array, {.sync = false});
+      auto result = collection.insert(array, {.sync = false});
 
+      for (auto row : result.array_range()) {
+        auto id = row.get_value_or<std::string>("_id", "");
+        if (!id.empty()) ids.push_back(id);
+      }
       count -= request;
     }
+    collection_ids_.insert_or_assign(collection.name(), ids);
+  }
+
+  for (auto& graph : graphs.array_range()) {
+    auto name = graph.get_value_or<std::string>("name", "");
+    auto from = graph.get_value_or<std::string>("from", "");
+    auto to = graph.get_value_or<std::string>("to", "");
+    auto allow_collisions = graph.get_value_or<bool>("allow_collisions", true);
+
+    if (!edge_collections_.contains(name)) {
+      std::cout << "Edge collection not found: " << name << std::endl;
+      continue;
+    }
+    if (!collection_ids_.contains(from)) {
+      std::cout << "From collection not found: " << from << std::endl;
+      continue;
+    }
+    if (!collection_ids_.contains(to)) {
+      std::cout << "To collection not found: " << to << std::endl;
+      continue;
+    }
+
+    std::cout << "Creating edge collection: " << name << " with data from " << from << " to " << to << std::endl;
+
+    auto collection = edge_collections_.at(name);
+    auto count_interval = graph.get_value_or<std::pair<int, int>>("count", std::pair<int, int>(1, 1));
+    auto count = random_interval(count_interval);
+    auto org_count = count;
+    std::unordered_set<std::string> edges;
+
+    while (count > 0) {
+      auto request = 0;
+      if (count > BATCH_SIZE)
+        request = BATCH_SIZE;
+      else
+        request = count;
+
+      jsoncons::json array(jsoncons::json_array_arg);
+      for (int no = 0; no < request; no++) {
+        auto from_interval = std::pair<int, int>(0, collection_ids_.at(from).size() - 1);
+        auto to_interval = std::pair<int, int>(0, collection_ids_.at(to).size() - 1);
+        auto from_index = random_interval(from_interval);
+        auto to_index = random_interval(to_interval);
+        auto key = tools::string_format("%ld-%ld", from_index, to_index);
+
+        if (allow_collisions || edges.find(key) == edges.end()) {
+          array.push_back(to_json{{"_from", collection_ids_.at(from).at(from_index)}, {"_to", collection_ids_.at(to).at(to_index)}});
+          if (!allow_collisions) edges.insert(key);
+        }
+      }
+      collection.insert(array, {.sync = false});
+      count -= request;
+    }
+    if (!allow_collisions) {
+      auto conflicts = edges.size();
+      std::cout << "Edges created: " << conflicts << ", Conflicts " << org_count - conflicts << std::endl;
+    } else
+      std::cout << "Edges created: " << org_count << std::endl;
+
+    database_.createGraph({.name = name, .edge_definitions = {{.collection = name, .from = {from}, .to = {to}}}});
   }
 
   return true;

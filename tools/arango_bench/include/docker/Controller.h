@@ -11,6 +11,9 @@ class Controller {
 
   auto set_version(std::string);
 
+  auto get_image_list() -> std::vector<std::string>;
+  auto pull_image(std::string) -> bool;
+
   auto create_network(CreateNetworkInput) -> std::string;
   auto create_volume(CreateVolumeInput) -> std::string;
   auto create_port_mapping(PortMappingInput) -> bool;

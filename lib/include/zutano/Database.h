@@ -4,6 +4,7 @@
 #include <vector>
 #include <zutano/PrivateImpl.h>
 #include <zutano/Collection.h>
+#include <zutano/Graph.h>
 #include <zutano/Cursor.h>
 #include <jsoncons/json.hpp>
 #include <zutano/input/DatabaseInput.h>
@@ -36,9 +37,11 @@ class Database {
   // Create functions
   auto createDatabase(input::DatabaseCreateInput) -> Database;
   auto createCollection(input::CollectionCreateInput) -> Collection;
+  auto createGraph(input::GraphCreateInput) -> Graph;
 
   // Access functions
   auto collection(std::string) -> Collection;
+  auto graph(std::string) -> Graph;
   auto name() -> std::string;
 
  private:

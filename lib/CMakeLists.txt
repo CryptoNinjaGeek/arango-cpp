@@ -27,13 +27,15 @@ add_library(zutano SHARED
         src/Connection.cpp
         src/Database.cpp
         src/Collection.cpp
+        src/Graph.cpp
         src/Request.cpp
         src/Response.cpp
         src/Index.cpp
-        include/zutano/input/DocumentInput.h
+        src/Cursor.cpp
         include/zutano/input/DocumentInput.h
         include/zutano/input/IndexInput.h
-        src/Cursor.cpp include/zutano/Cursor.h)
+        include/zutano/Cursor.h
+)
 
 add_library(zutano::zutano ALIAS zutano)
 

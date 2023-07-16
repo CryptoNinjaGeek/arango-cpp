@@ -28,7 +28,7 @@ inline bool replace(std::string& str, const std::string& from, const std::string
   return true;
 }
 
-inline std::string toArray(jsoncons::json doc) {
+inline std::string toArray(const jsoncons::json& doc) {
   if (!doc.is_array()) {
     return std::string("[") + doc.to_string() + std::string("]");
   } else
@@ -40,7 +40,7 @@ inline std::string removeLastSlash(std::string str) {
   return str;
 }
 
-inline std::vector<std::string> split(std::string str, char sep) {
+inline std::vector<std::string> split(const std::string& str, char sep) {
   std::vector<std::string> strings;
   std::istringstream f(str);
   std::string s;

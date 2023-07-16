@@ -33,7 +33,7 @@ auto main() -> int {
     for (int no = 1; no < 100000; no++) {
       array.push_back(to_json{{"name", std::string("josh-") + std::to_string(no)}, {"age", no}});
     }
-    array = students.insert(array, {.sync = false});
+    students.insert(array, {.sync = false});
 
     students.insert(to_json{{"name", "judy1"}, {"age", 21}}, {.overwrite = true});
   } catch (std::exception& e) {

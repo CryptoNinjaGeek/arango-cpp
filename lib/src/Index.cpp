@@ -171,9 +171,5 @@ auto Collection::addIndex(const jsoncons::json& data) -> jsoncons::json {
 
   return response.body();
 }
-auto Collection::name() -> std::string {
-  auto p = pimp::CollectionPimpl::pimpl(p_);
-  return p->name_;
-}
 
 }  // namespace zutano

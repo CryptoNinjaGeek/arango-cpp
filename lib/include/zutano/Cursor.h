@@ -33,7 +33,7 @@ class Cursor {
   auto update(jsoncons::json) -> bool;
   auto fetch() -> bool;
   auto close(bool ignore_missing = false) -> bool;
-  
+
  private:
   private_impl_ptr p_;
 };
