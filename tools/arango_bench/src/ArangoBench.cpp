@@ -9,7 +9,7 @@
 #include <memory>    // For std::unique_ptr
 
 #include "JsonGenerator.h"
-#include "ProgressBar.h"
+#include "ProgressLine.h"
 #include "Input.h"
 #include "Tools.h"
 
@@ -73,17 +73,30 @@ auto ArangoBench::shutdown() -> bool {
   )");
 
   auto containers = controller.list_containers({.all = true, .filters = label});
-  for (auto container_id : containers) {
-    if (controller.stop_container({.id = container_id, .timeout = 5})) controller.remove_container(container_id);
+  if (!containers.empty()) {
+    ProgressLine bar("Stopping and removing controllers", containers.size());
+    for (auto container_id : containers) {
+      if (controller.stop_container({.id = container_id, .timeout = 5})) controller.remove_container(container_id);
+      bar.update();
+    }
   }
 
   auto networks = controller.list_networks({.filters = label});
-  for (auto networks_id : networks) {
-    controller.remove_network(networks_id);
+  if (!networks.empty()) {
+    ProgressLine bar("Removing networks", networks.size());
+    for (auto networks_id : networks) {
+      controller.remove_network(networks_id);
+      bar.update();
+    }
   }
+
   auto volumes = controller.list_volumes({.filters = label});
-  for (auto volumes_id : volumes) {
-    controller.remove_volume(volumes_id);
+  if (!volumes.empty()) {
+    ProgressLine bar("Removing volumes", volumes.size());
+    for (auto volumes_id : volumes) {
+      controller.remove_volume(volumes_id);
+      bar.update();
+    }
   }
 
   return true;
@@ -191,7 +204,7 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
 
   std::vector<std::string> command;
   std::map<std::string, std::string> labels;
-  std::vector<std::string> enviroment;
+  std::vector<std::string> environment;
 
   labels["arango_bench"] = true;
   labels["name"] = input.name;
@@ -202,7 +215,7 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
 
   command.insert(command.end(), input.command.begin(), input.command.end());
 
-  enviroment.push_back("ARANGO_NO_AUTH=1");
+  environment.push_back("ARANGO_NO_AUTH=1");
 
   auto volume_id = controller.create_volume({.name = input.name, .labels = labels});
   auto container_id = controller.create_container({.name = input.name,
@@ -211,7 +224,7 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
                                                    .labels = labels,
                                                    .command = command,
                                                    .port = input.port,
-                                                   .enviroment = enviroment,
+                                                   .environment = environment,
                                                    .volume = tools::string_format("%s:/var/lib/arangodb", volume_id.c_str())});
 
   controller.connect_container_to_network({.container = container_id, .network = input.network_id});
@@ -250,7 +263,7 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
     for (int no = 1; no <= count; no++) {
       auto name = naming_schema;
       name = std::regex_replace(name, std::regex("\\{id\\}"), std::to_string(no));
-      auto sharding = random_interval(sharding_interval);
+      auto sharding = randomInterval(sharding_interval);
       auto collection = database_.createCollection({.name = name, .shard_count = sharding});
       document_collections_.push_back(collection);
     }
@@ -266,7 +279,7 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
     for (int no = 1; no <= count; no++) {
       auto name = naming_schema;
       name = std::regex_replace(name, std::regex("\\{id\\}"), std::to_string(no));
-      auto sharding = random_interval(sharding_interval);
+      auto sharding = randomInterval(sharding_interval);
       auto collection = database_.createCollection({.name = name, .shard_count = sharding, .edge = true});
       std::cout << "Created edge collection: " << name << std::endl;
       edge_collections_.insert_or_assign(name, collection);
@@ -283,7 +296,7 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
   auto content = documents.get_value_or<jsoncons::json>("content", jsoncons::json());
 
   for (auto collection : document_collections_) {
-    auto count = random_interval(count_interval);
+    auto count = randomInterval(count_interval);
 
     std::cout << "Collection: " << collection.name() << " , Size: " << count << std::endl;
 
@@ -330,7 +343,7 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
 
     auto collection = edge_collections_.at(name);
     auto count_interval = graph.get_value_or<std::pair<int, int>>("count", std::pair<int, int>(1, 1));
-    auto count = random_interval(count_interval);
+    auto count = randomInterval(count_interval);
     auto org_count = count;
     std::unordered_set<std::string> edges;
 
@@ -345,8 +358,8 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
       for (int no = 0; no < request; no++) {
         auto from_interval = std::pair<int, int>(0, collection_ids_.at(from).size() - 1);
         auto to_interval = std::pair<int, int>(0, collection_ids_.at(to).size() - 1);
-        auto from_index = random_interval(from_interval);
-        auto to_index = random_interval(to_interval);
+        auto from_index = randomInterval(from_interval);
+        auto to_index = randomInterval(to_interval);
         auto key = tools::string_format("%ld-%ld", from_index, to_index);
 
         if (allow_collisions || edges.find(key) == edges.end()) {
@@ -368,9 +381,10 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
 
   return true;
 }
+
 auto ArangoBench::runTests(jsoncons::json&) -> bool { return false; }
 
-auto ArangoBench::random_interval(std::pair<int, int>& interval) -> int {
+auto ArangoBench::randomInterval(std::pair<int, int>& interval) -> int {
   return (rand_source_() % (interval.second - interval.first + 1)) + interval.first;
 }
 

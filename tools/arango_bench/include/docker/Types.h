@@ -29,7 +29,7 @@ struct CreateContainerInput {
   std::optional<std::string> group;
   std::optional<std::string> host_config;
   std::optional<std::vector<std::string>> command;
-  std::optional<std::vector<std::string>> enviroment;
+  std::optional<std::vector<std::string>> environment;
   std::optional<std::map<std::string, std::string>> labels;
 };
 

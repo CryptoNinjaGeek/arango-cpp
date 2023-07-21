@@ -1,0 +1,82 @@
+{
+  "system": {
+    "version": "3.11.1",
+    "deployment": "Local",
+    "cleanup": true,
+    "agency": 3,
+    "coordinators": 9,
+    "dbservers": 30
+  },
+  "database": {
+    "name": "NCBI",
+    "replication_factor": 3,
+    "write_concern": 1,
+    "documents": {
+      "count": 200,
+      "naming_schema": "collection_{id}",
+      "sharding": [
+        15,
+        15
+      ]
+    },
+    "graphs": {
+      "count": 184,
+      "naming_schema": "edges_{id}",
+      "sharding": [
+        15,
+        15
+      ]
+    }
+  },
+  "data": {
+    "documents": {
+      "count": {
+        "from": 1,
+        "to": 18000000000
+      },
+      "content": [
+        {
+          "name": "name",
+          "type": "static",
+          "special_type": "name",
+          "null_percentage": 0,
+          "length": 32
+        },
+        {
+          "name": "description",
+          "type": "static",
+          "special_type": "words",
+          "null_percentage": 0,
+          "length_interval": [
+            10,
+            100
+          ]
+        }
+      ]
+    },
+    "graphs": [
+      {
+        "name": "edges_1",
+        "count": {
+          "from": 10000,
+          "to": 20000
+        },
+        "allow_collisions": false,
+        "from": "collection_1",
+        "to": "collection_2"
+      },
+      {
+        "name": "edges_2",
+        "count": {
+          "from": 1000000,
+          "to": 2000000
+        },
+        "allow_collisions": false,
+        "from": "collection_1",
+        "to": "collection_5"
+      }
+    ]
+  },
+  "test": {
+  }
+}

@@ -7,6 +7,8 @@
 
 #include "Input.h"
 
+class ProgressBar;
+
 namespace arango_bench {
 
 class ArangoBench {
@@ -26,7 +28,7 @@ class ArangoBench {
   auto createData(jsoncons::json&) -> bool;
   auto runTests(jsoncons::json&) -> bool;
 
-  inline auto random_interval(std::pair<int, int>&) -> int;
+  inline auto randomInterval(std::pair<int, int>& interval) -> int;
 
  private:
   std::vector<zutano::Collection> document_collections_;

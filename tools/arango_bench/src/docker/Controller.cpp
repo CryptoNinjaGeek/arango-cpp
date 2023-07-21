@@ -54,8 +54,8 @@ auto Controller::create_container(CreateContainerInput input) -> std::string {
 
   param.push_back(std::pair<std::string, std::string>("name", input.name));
 
-  if (input.enviroment) {
-    data.merge(to_json{{"Env", input.enviroment.value()}});
+  if (input.environment) {
+    data.merge(to_json{{"Env", input.environment.value()}});
   }
 
   if (input.command) {
@@ -77,7 +77,7 @@ auto Controller::create_container(CreateContainerInput input) -> std::string {
   }
 
   auto response = send_request(RequestType::POST, "/containers/create", data, param);
-  
+
   return response.get_value_or<std::string>("Id", "");
 }
 

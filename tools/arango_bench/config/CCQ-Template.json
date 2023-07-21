@@ -1,0 +1,119 @@
+{
+  "system": {
+    "version": "3.11.1",
+    "deployment": "Local",
+    "cleanup": true,
+    "agency": 3,
+    "coordinators": 3,
+    "dbservers": 4
+  },
+  "database": {
+    "name": "test",
+    "replication_factor": 3,
+    "write_concern": 1,
+    "documents": {
+      "count": 10,
+      "naming_schema": "collection_{id}",
+      "sharding": [
+        10,
+        100
+      ]
+    },
+    "graphs": {
+      "count": 2,
+      "naming_schema": "edges_{id}",
+      "sharding": [
+        2,
+        4
+      ]
+    }
+  },
+  "data": {
+    "documents": {
+      "count": {
+        "from": 100000,
+        "to": 200000
+      },
+      "content": [
+        {
+          "name": "name",
+          "type": "static",
+          "special_type": "name",
+          "null_percentage": 10,
+          "length": 32
+        },
+        {
+          "name": "country",
+          "type": "static",
+          "special_type": "country",
+          "null_percentage": 10,
+          "length": 1
+        },
+        {
+          "name": "description",
+          "type": "static",
+          "special_type": "words",
+          "null_percentage": 10,
+          "length_interval": [
+            100,
+            1000
+          ]
+        },
+        {
+          "name": "count",
+          "type": "int",
+          "null_percentage": 30
+        },
+        {
+          "name": "verified",
+          "type": "boolean",
+          "null_percentage": 0
+        },
+        {
+          "name": "firstObject",
+          "type": "object",
+          "null_percentage": 10,
+          "object_content": [
+            {
+              "name": "key1",
+              "type": "string",
+              "null_percentage": 0,
+              "length": 12
+            },
+            {
+              "name": "key2",
+              "type": "int",
+              "null_percentage": 50,
+              "min": 10,
+              "max": 20
+            }
+          ]
+        }
+      ]
+    },
+    "graphs": [
+      {
+        "name": "edges_1",
+        "count": {
+          "from": 10000,
+          "to": 20000
+        },
+        "allow_collisions": false,
+        "from": "collection_1",
+        "to": "collection_2"
+      },
+      {
+        "name": "edges_2",
+        "count": {
+          "from": 1000000,
+          "to": 2000000
+        },
+        "allow_collisions": false,
+        "from": "collection_1",
+        "to": "collection_5"
+      }
+    ]
+  },
+  "test": {
+  }
+}

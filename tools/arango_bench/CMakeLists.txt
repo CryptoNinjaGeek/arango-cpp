@@ -30,6 +30,7 @@ add_executable(arango_bench
         include/JsonGenerator.h
         include/static_countries.h
         include/static_names.h
+        include/ProgressLine.h
 )
 target_link_libraries(arango_bench PUBLIC zutano cxxopts cpr::cpr)
 target_include_directories(arango_bench PRIVATE ./include ./include/docker)
