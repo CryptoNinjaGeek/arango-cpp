@@ -11,7 +11,15 @@ FetchContent_Declare(
         GIT_TAG 1.10.1
 )
 
+FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG 10.0.0
+)
+
 FetchContent_MakeAvailable(cxxopts)
+FetchContent_MakeAvailable(fmt)
+FetchContent_MakeAvailable(cpr)
 
 add_executable(arango_bench
         src/main.cpp
@@ -32,5 +40,5 @@ add_executable(arango_bench
         include/static_names.h
         include/ProgressLine.h
 )
-target_link_libraries(arango_bench PUBLIC zutano cxxopts cpr::cpr)
+target_link_libraries(arango_bench PUBLIC zutano cxxopts cpr::cpr fmt::fmt)
 target_include_directories(arango_bench PRIVATE ./include ./include/docker)

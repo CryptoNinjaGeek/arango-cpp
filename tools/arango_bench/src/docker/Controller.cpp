@@ -7,6 +7,7 @@
 #include <zutano/Tools.h>
 #include <cpr/cpr.h>
 #include "Tools.h"
+#include <fmt/core.h>
 
 using namespace zutano::tools;
 
@@ -68,10 +69,10 @@ auto Controller::create_container(CreateContainerInput input) -> std::string {
 
   try {
     data.merge(
-        jsoncons::json::parse(arango_bench::tools::string_format("{\"HostConfig\": { \
- \"PortBindings\" : {\"8529/tcp\" : [ {\"HostPort\" : \"%ld\"}]}, \
- \"Binds\": [\"%s\"]}}",
-                                                                 input.port, input.volume.c_str())));
+        jsoncons::json::parse(fmt::format("{{\"HostConfig\": {{ \
+ \"PortBindings\" : {{\"8529/tcp\" : [ {{\"HostPort\" : \"{}\"}}]}}, \
+ \"Binds\": [\"{}\"]}}}}",
+                                          input.port, input.volume.c_str())));
   } catch (const std::exception& e) {
     std::cout << e.what() << '\n';
   }
@@ -84,14 +85,14 @@ auto Controller::create_container(CreateContainerInput input) -> std::string {
 auto Controller::connect_container_to_network(ConnectNetworkInput input) -> bool {
   jsoncons::json data = to_json{{"Container", input.container}};
 
-  auto response = send_request(RequestType::POST, arango_bench::tools::string_format("/networks/%s/connect", input.network.c_str()), data);
+  auto response = send_request(RequestType::POST, fmt::format("/networks/{}/connect", input.network.c_str()), data);
   auto error_message = response.get_value_or<std::string>("message", "");
 
   return error_message.empty();
 }
 
 auto Controller::start_container(std::string container_id) -> bool {
-  auto response = send_request(RequestType::POST, arango_bench::tools::string_format("/containers/%s/start", container_id.c_str()));
+  auto response = send_request(RequestType::POST, fmt::format("/containers/{}/start", container_id.c_str()));
   auto error_message = response.get_value_or<std::string>("message", "");
 
   return error_message.empty();
@@ -220,8 +221,7 @@ auto Controller::stop_container(StopContainerInput input) -> bool {
 
   parameters.push_back(std::pair<std::string, std::string>("t", std::to_string(input.timeout)));
 
-  auto response =
-      send_request(RequestType::POST, arango_bench::tools::string_format("/containers/%s/stop", input.id.c_str()), {}, parameters);
+  auto response = send_request(RequestType::POST, fmt::format("/containers/{}/stop", input.id.c_str()), {}, parameters);
 
   if (response.contains("message")) {
     std::cout << response.get_value_or<std::string>("message", "Unknown error") << std::endl;
@@ -232,7 +232,7 @@ auto Controller::stop_container(StopContainerInput input) -> bool {
 }
 
 auto Controller::remove_container(std::string id) -> bool {
-  auto response = send_request(RequestType::DELETE, arango_bench::tools::string_format("/containers/%s", id.c_str()));
+  auto response = send_request(RequestType::DELETE, fmt::format("/containers/{}", id.c_str()));
 
   if (response.contains("message")) {
     std::cout << response.get_value_or<std::string>("message", "Unknown error") << std::endl;
@@ -243,7 +243,7 @@ auto Controller::remove_container(std::string id) -> bool {
 }
 
 auto Controller::remove_network(std::string id) -> bool {
-  auto response = send_request(RequestType::DELETE, arango_bench::tools::string_format("/networks/%s", id.c_str()));
+  auto response = send_request(RequestType::DELETE, fmt::format("/networks/{}", id.c_str()));
 
   if (response.contains("message")) {
     std::cout << response.get_value_or<std::string>("message", "Unknown error") << std::endl;
@@ -254,7 +254,7 @@ auto Controller::remove_network(std::string id) -> bool {
 }
 
 auto Controller::remove_volume(std::string name) -> bool {
-  auto response = send_request(RequestType::DELETE, arango_bench::tools::string_format("/volumes/%s", name.c_str()));
+  auto response = send_request(RequestType::DELETE, fmt::format("/volumes/{}", name.c_str()));
 
   if (response.contains("message")) {
     std::cout << response.get_value_or<std::string>("message", "Unknown error") << std::endl;
