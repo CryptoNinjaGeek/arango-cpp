@@ -27,6 +27,7 @@ class ArangoBench {
   auto createSchema(jsoncons::json&) -> bool;
   auto createData(jsoncons::json&) -> bool;
   auto runTests(jsoncons::json&) -> bool;
+  auto waitOnPingOk() -> bool;
 
   inline auto randomInterval(std::pair<int, int>& interval) -> int;
 

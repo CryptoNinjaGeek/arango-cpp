@@ -100,13 +100,15 @@ auto Controller::start_container(std::string container_id) -> bool {
 
 auto Controller::set_version(std::string version) { version_ = version; }
 
+auto Controller::set_host(std::string host) { host_ = host; }
+
 auto Controller::send_request(RequestType request_type, std::string path, jsoncons::json data,
                               std::vector<std::pair<std::string, std::string>> parameters) -> jsoncons::json {
   cpr::Session session;
   cpr::Header headers;
   cpr::Parameters create_parameters;
 
-  std::string url_string = "http://localhost/" + version_ + path;
+  std::string url_string = fmt::format("http://{}/{}{}", host_, version_, path);
   auto url = cpr::Url{url_string};
 
   headers["Content-Type"] = "application/json";
@@ -140,7 +142,7 @@ auto Controller::send_request(RequestType request_type, std::string path, jsonco
   try {
     if (not r.text.empty()) j = jsoncons::json::parse(r.text);
   } catch (const std::exception& e) {
-    std::cout << r.text << std::endl;
+    //    std::cout << r.text << std::endl; #TODO: parse array of json objects
   }
 
   return j;
@@ -289,8 +291,6 @@ auto Controller::pull_image(std::string image) -> bool {
   param.push_back(std::pair<std::string, std::string>("fromImage", image));
 
   auto response = send_request(RequestType::POST, "/images/create", {}, param);
-
-  std::cout << response.to_string() << std::endl;
 
   auto error = response.get_value_or<std::string>("message", "");
 

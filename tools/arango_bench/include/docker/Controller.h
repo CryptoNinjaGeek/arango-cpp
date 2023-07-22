@@ -10,6 +10,7 @@ class Controller {
   Controller() = default;
 
   auto set_version(std::string);
+  auto set_host(std::string);
 
   auto get_image_list() -> std::vector<std::string>;
   auto pull_image(std::string) -> bool;
@@ -36,7 +37,8 @@ class Controller {
                     std::vector<std::pair<std::string, std::string>> parameters = {}) -> jsoncons::json;
 
  private:
-  std::string version_;
+  std::string version_{"v1.43"};
+  std::string host_{"localhost"};
 };
 
 }  // namespace docker

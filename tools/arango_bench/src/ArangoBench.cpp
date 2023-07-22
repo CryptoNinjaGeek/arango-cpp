@@ -8,7 +8,7 @@
 #include <stdarg.h>  // For va_start, etc.
 #include <memory>    // For std::unique_ptr
 #include <fmt/core.h>
-
+#include <indicators/progress_spinner.hpp>
 #include "JsonGenerator.h"
 #include "ProgressLine.h"
 #include "Input.h"
@@ -137,65 +137,75 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
   if (network_id.empty()) {
     return false;
   }
-  std::cout << "Created network => " << network_id << std::endl;
 
-  for (int n = 0; n < agency_count; n++) {
-    std::vector<std::string> command;
-    auto name = fmt::format("agent{}", n);
+  if (agency_count) {
+    ProgressLine bar("Creating Agencies", agency_count);
+    for (int n = 0; n < agency_count; n++) {
+      std::vector<std::string> command;
+      auto name = fmt::format("agent{}", n);
 
-    command.push_back("--agency.activate=true");
-    command.push_back("--agency.supervision=true");
-    command.push_back(fmt::format("--agency.my-address=tcp://{}", name.c_str()));
-    command.push_back(fmt::format("--agency.size={}", agency_count));
-    command.push_back("--agency.endpoint=tcp://agent1");
+      command.push_back("--agency.activate=true");
+      command.push_back("--agency.supervision=true");
+      command.push_back(fmt::format("--agency.my-address=tcp://{}", name.c_str()));
+      command.push_back(fmt::format("--agency.size={}", agency_count));
+      command.push_back("--agency.endpoint=tcp://agent1");
 
-    startDockerContainer({.name = name,
-                          .command = command,
-                          .port = start_port++,
-                          .network_id = network_id,
-                          .image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"))});
-  }
-  std::cout << "Created agency => " << agency_count << std::endl;
-
-  for (int n = 0; n < dbserver_count; n++) {
-    std::vector<std::string> command;
-    auto name = fmt::format("dbserver{}", n);
-
-    command.push_back(fmt::format("--cluster.my-address=tcp://{}", name));
-    command.push_back("--cluster.my-role=DBSERVER");
-
-    for (int no = 0; no < agency_count; no++) {
-      command.push_back(fmt::format("--cluster.agency-endpoint=tcp://agent{}", no));
+      startDockerContainer({.name = name,
+                            .command = command,
+                            .port = start_port++,
+                            .network_id = network_id,
+                            .image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"))});
+      bar.tick();
     }
-
-    startDockerContainer({.name = name,
-                          .command = command,
-                          .port = start_port++,
-                          .network_id = network_id,
-                          .image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"))});
   }
-  std::cout << "Created db servers => " << dbserver_count << std::endl;
 
-  for (int n = 0; n < coordinators_count; n++) {
-    std::vector<std::string> command;
-    auto name = fmt::format("coordinator{}", n);
+  if (dbserver_count) {
+    ProgressLine bar("Creating DBServers", dbserver_count);
 
-    command.push_back(fmt::format("--cluster.my-address=tcp://{}", name));
-    command.push_back("--cluster.my-role=COORDINATOR");
+    for (int n = 0; n < dbserver_count; n++) {
+      std::vector<std::string> command;
+      auto name = fmt::format("dbserver{}", n);
 
-    for (int no = 0; no < agency_count; no++) {
-      command.push_back(fmt::format("--cluster.agency-endpoint=tcp://agent{}", no));
+      command.push_back(fmt::format("--cluster.my-address=tcp://{}", name));
+      command.push_back("--cluster.my-role=DBSERVER");
+
+      for (int no = 0; no < agency_count; no++) {
+        command.push_back(fmt::format("--cluster.agency-endpoint=tcp://agent{}", no));
+      }
+
+      startDockerContainer({.name = name,
+                            .command = command,
+                            .port = start_port++,
+                            .network_id = network_id,
+                            .image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"))});
+      bar.tick();
     }
-
-    coordinators.push_back(fmt::format("http://localhost:{}/", start_port));
-
-    startDockerContainer({.name = name,
-                          .command = command,
-                          .port = start_port++,
-                          .network_id = network_id,
-                          .image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"))});
   }
-  std::cout << "Created coordinators => " << coordinators_count << std::endl;
+
+  if (coordinators_count) {
+    ProgressLine bar("Creating Coordinators", coordinators_count);
+
+    for (int n = 0; n < coordinators_count; n++) {
+      std::vector<std::string> command;
+      auto name = fmt::format("coordinator{}", n);
+
+      command.push_back(fmt::format("--cluster.my-address=tcp://{}", name));
+      command.push_back("--cluster.my-role=COORDINATOR");
+
+      for (int no = 0; no < agency_count; no++) {
+        command.push_back(fmt::format("--cluster.agency-endpoint=tcp://agent{}", no));
+      }
+
+      coordinators.push_back(fmt::format("http://localhost:{}/", start_port));
+
+      startDockerContainer({.name = name,
+                            .command = command,
+                            .port = start_port++,
+                            .network_id = network_id,
+                            .image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"))});
+      bar.tick();
+    }
+  }
 
   connection_ = Connection().hosts(coordinators);
 
@@ -243,13 +253,35 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
 
 auto ArangoBench::setupArangoGraph(jsoncons::json&) -> bool { return false; }
 
-auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
-  if (!connection_.ping()) {
-    std::cout << "ping'ed failed" << std::endl;
-    return false;
-  } else
-    std::cout << "ping'ed ok" << std::endl;
+auto ArangoBench::waitOnPingOk() -> bool {
+  using namespace indicators;
+  indicators::ProgressSpinner spinner{option::PostfixText{"Checking servers"}, option::ForegroundColor{Color::yellow},
+                                      option::SpinnerStates{std::vector<std::string>{"⠈", "⠐", "⠠", "⢀", "⡀", "⠄", "⠂", "⠁"}},
+                                      option::FontStyles{std::vector<FontStyle>{FontStyle::bold}}};
 
+  // Update spinner state
+  auto job = [&spinner, this]() {
+    while (true) {
+      if (connection_.ping()) {
+        spinner.set_option(option::ForegroundColor{Color::green});
+        spinner.set_option(option::PrefixText{"✔"});
+        spinner.set_option(option::ShowSpinner{false});
+        spinner.set_option(option::ShowPercentage{false});
+        spinner.set_option(option::PostfixText{"Cluster ready!"});
+        spinner.mark_as_completed();
+        break;
+      }
+      spinner.tick();
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+  };
+  std::thread thread(job);
+  thread.join();
+  return true;
+}
+
+auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
+  if (!waitOnPingOk()) return false;
   auto sys_db = connection_.database("_system");
   auto db_name = json.get_value_or<std::string>("name", "demo");
 
@@ -267,6 +299,7 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
     auto count = collections.get_value_or<int>("count", 1);
     auto naming_schema = collections.get_value_or<std::string>("naming_schema", "collection{id}");
     auto sharding_interval = collections.get_value_or<std::pair<int, int>>("sharding", std::pair<int, int>(1, 1));
+    ProgressLine bar("Creating collection schema", count);
 
     for (int no = 1; no <= count; no++) {
       auto name = naming_schema;
@@ -274,6 +307,7 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
       auto sharding = randomInterval(sharding_interval);
       auto collection = database_.createCollection({.name = name, .shard_count = sharding});
       document_collections_.push_back(collection);
+      bar.tick();
     }
   }
 
@@ -283,14 +317,15 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
     auto count = graphs.get_value_or<int>("count", 1);
     auto naming_schema = graphs.get_value_or<std::string>("naming_schema", "collection{id}");
     auto sharding_interval = graphs.get_value_or<std::pair<int, int>>("sharding", std::pair<int, int>(1, 1));
+    ProgressLine bar("Creating edge schema", count);
 
     for (int no = 1; no <= count; no++) {
       auto name = naming_schema;
       name = std::regex_replace(name, std::regex("\\{id\\}"), std::to_string(no));
       auto sharding = randomInterval(sharding_interval);
       auto collection = database_.createCollection({.name = name, .edge = true, .shard_count = sharding});
-      std::cout << "Created edge collection: " << name << std::endl;
       edge_collections_.insert_or_assign(name, collection);
+      bar.tick();
     }
   }
 
@@ -305,8 +340,7 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
 
   for (auto collection : document_collections_) {
     auto count = randomInterval(count_interval);
-
-    std::cout << "Collection: " << collection.name() << " , Size: " << count << std::endl;
+    ProgressLine bar(collection.name(), count);
 
     std::vector<std::string> ids;
     while (count > 0) {
@@ -324,6 +358,7 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
         if (!id.empty()) ids.push_back(id);
       }
       count -= request;
+      bar.set_progress(bar.current() + request);
     }
     collection_ids_.insert_or_assign(collection.name(), ids);
   }
@@ -347,13 +382,12 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
       continue;
     }
 
-    std::cout << "Creating edge collection: " << name << " with data from " << from << " to " << to << std::endl;
-
     auto collection = edge_collections_.at(name);
     auto count_interval = graph.get_value_or<std::pair<int, int>>("count", std::pair<int, int>(1, 1));
     auto count = randomInterval(count_interval);
     auto org_count = count;
     std::unordered_set<std::string> edges;
+    ProgressLine bar(name, count);
 
     while (count > 0) {
       auto request = 0;
@@ -377,12 +411,11 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
       }
       collection.insert(array, {.sync = false});
       count -= request;
+      bar.set_progress(bar.current() + request);
     }
     if (!allow_collisions) {
       auto conflicts = edges.size();
-      std::cout << "Edges created: " << conflicts << ", Conflicts " << org_count - conflicts << std::endl;
-    } else
-      std::cout << "Edges created: " << org_count << std::endl;
+    }
 
     database_.createGraph({.name = name, .edge_definitions = {{.collection = name, .from = {from}, .to = {to}}}});
   }
