@@ -21,15 +21,15 @@ auto main(int argc, char* argv[]) -> int {
 
   auto result = options.parse(argc, argv);
 
-  if (result.count("help")) {
+  if (result.count("configuration")) input.configuration = result["configuration"].as<std::string>();
+  if (result.count("shutdown")) input.shutdown = true;
+  if (result.count("verbose")) input.verbose = true;
+
+  if (result.count("help") || (!input.shutdown && input.configuration.empty())) {
     std::cout << options.help() << std::endl;
     exit(0);
   }
 
-  if (result.count("configuration")) input.configuration = result["configuration"].as<std::string>();
-  if (result.count("shutdown")) input.shutdown = true;
-  if (result.count("verbose")) input.verbose = true;
-  
   arango_bench::ArangoBench bench(input);
 
   if (input.shutdown)

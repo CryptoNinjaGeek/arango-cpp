@@ -7,6 +7,7 @@
 #include <fstream>
 #include <stdarg.h>  // For va_start, etc.
 #include <memory>    // For std::unique_ptr
+#include <fmt/core.h>
 
 #include "JsonGenerator.h"
 #include "ProgressLine.h"
@@ -110,11 +111,13 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
 
   labels["arango_bench"] = true;
 
+  auto image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"));
+
   auto images = controller.get_image_list();
   if (!std::count(images.begin(), images.end(),
-                  tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest")))) {
+                  fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest")))) {
     std::cout << "Pulling image arangodb/arangodb:" << system.get_value_or<std::string_view>("version", "latest") << std::endl;
-    controller.pull_image(tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest")));
+    controller.pull_image(fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest")));
   }
 
   auto network_id = controller.create_network({.name = "arango_graph", .check_duplicate = false, .labels = labels});
@@ -129,62 +132,59 @@ auto ArangoBench::setupDocker(jsoncons::json& system) -> bool {
 
   for (int n = 0; n < agency_count; n++) {
     std::vector<std::string> command;
-    auto name = tools::string_format("agent%ld", n);
+    auto name = fmt::format("agent{}", n);
 
     command.push_back("--agency.activate=true");
     command.push_back("--agency.supervision=true");
-    command.push_back(tools::string_format("--agency.my-address=tcp://%s", name.c_str()));
-    command.push_back(tools::string_format("--agency.size=%ld", agency_count));
+    command.push_back(fmt::format("--agency.my-address=tcp://{}", name.c_str()));
+    command.push_back(fmt::format("--agency.size={}", agency_count));
     command.push_back("--agency.endpoint=tcp://agent1");
 
-    startDockerContainer(
-        {.name = name,
-         .command = command,
-         .port = start_port++,
-         .network_id = network_id,
-         .image = tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest"))});
+    startDockerContainer({.name = name,
+                          .command = command,
+                          .port = start_port++,
+                          .network_id = network_id,
+                          .image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"))});
   }
   std::cout << "Created agency => " << agency_count << std::endl;
 
   for (int n = 0; n < dbserver_count; n++) {
     std::vector<std::string> command;
-    auto name = tools::string_format("dbserver%ld", n);
+    auto name = fmt::format("dbserver{}", n);
 
-    command.push_back(tools::string_format("--cluster.my-address=tcp://%s", name.c_str()));
+    command.push_back(fmt::format("--cluster.my-address=tcp://{}", name));
     command.push_back("--cluster.my-role=DBSERVER");
 
     for (int no = 0; no < agency_count; no++) {
-      command.push_back(tools::string_format("--cluster.agency-endpoint=tcp://agent%ld", no));
+      command.push_back(fmt::format("--cluster.agency-endpoint=tcp://agent{}", no));
     }
 
-    startDockerContainer(
-        {.name = name,
-         .command = command,
-         .port = start_port++,
-         .network_id = network_id,
-         .image = tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest"))});
+    startDockerContainer({.name = name,
+                          .command = command,
+                          .port = start_port++,
+                          .network_id = network_id,
+                          .image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"))});
   }
   std::cout << "Created db servers => " << dbserver_count << std::endl;
 
   for (int n = 0; n < coordinators_count; n++) {
     std::vector<std::string> command;
-    auto name = tools::string_format("coordinator%ld", n);
+    auto name = fmt::format("coordinator{}", n);
 
-    command.push_back(tools::string_format("--cluster.my-address=tcp://%s", name.c_str()));
+    command.push_back(fmt::format("--cluster.my-address=tcp://{}", name));
     command.push_back("--cluster.my-role=COORDINATOR");
 
     for (int no = 0; no < agency_count; no++) {
-      command.push_back(tools::string_format("--cluster.agency-endpoint=tcp://agent%ld", no));
+      command.push_back(fmt::format("--cluster.agency-endpoint=tcp://agent{}", no));
     }
 
-    coordinators.push_back(tools::string_format("http://localhost:%ld/", start_port));
+    coordinators.push_back(fmt::format("http://localhost:{}/", start_port));
 
-    startDockerContainer(
-        {.name = name,
-         .command = command,
-         .port = start_port++,
-         .network_id = network_id,
-         .image = tools::string_format("arangodb/arangodb:%s", system.get_value_or<std::string_view>("version", "latest"))});
+    startDockerContainer({.name = name,
+                          .command = command,
+                          .port = start_port++,
+                          .network_id = network_id,
+                          .image = fmt::format("arangodb/arangodb:{}", system.get_value_or<std::string_view>("version", "latest"))});
   }
   std::cout << "Created coordinators => " << coordinators_count << std::endl;
 
@@ -225,7 +225,7 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
                                                    .command = command,
                                                    .port = input.port,
                                                    .environment = environment,
-                                                   .volume = tools::string_format("%s:/var/lib/arangodb", volume_id.c_str())});
+                                                   .volume = fmt::format("{}:/var/lib/arangodb", volume_id.c_str())});
 
   controller.connect_container_to_network({.container = container_id, .network = input.network_id});
   controller.start_container(container_id);
@@ -360,7 +360,7 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
         auto to_interval = std::pair<int, int>(0, collection_ids_.at(to).size() - 1);
         auto from_index = randomInterval(from_interval);
         auto to_index = randomInterval(to_interval);
-        auto key = tools::string_format("%ld-%ld", from_index, to_index);
+        auto key = fmt::format("{}-{}", from_index, to_index);
 
         if (allow_collisions || edges.find(key) == edges.end()) {
           array.push_back(to_json{{"_from", collection_ids_.at(from).at(from_index)}, {"_to", collection_ids_.at(to).at(to_index)}});
