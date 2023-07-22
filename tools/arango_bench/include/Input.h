@@ -13,9 +13,9 @@ struct Input {
 
 struct StartDockerContainer {
   std::string name;
-  std::string image;
-  std::string network_id;
-  int port;
   std::vector<std::string> command;
+  int port;
+  std::string network_id;
+  std::string image;
 };
 }  // namespace arango_bench

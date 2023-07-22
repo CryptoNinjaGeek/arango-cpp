@@ -219,15 +219,15 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
 
   auto volume_id = controller.create_volume({.name = input.name, .labels = labels});
   auto container_id = controller.create_container({.name = input.name,
-                                                   .group = "arango_bench",
                                                    .image = input.image,
-                                                   .labels = labels,
-                                                   .command = command,
                                                    .port = input.port,
-                                                   .environment = environment,
-                                                   .volume = tools::string_format("%s:/var/lib/arangodb", volume_id.c_str())});
+                                                   .volume = tools::string_format("%s:/var/lib/arangodb", volume_id.c_str()),
+                                                  .command = command,
+                                                  .environment = environment,
+                                                   .labels = labels
+  });
 
-  controller.connect_container_to_network({.container = container_id, .network = input.network_id});
+  controller.connect_container_to_network({.network = input.network_id,.container = container_id});
   controller.start_container(container_id);
 
   return true;
@@ -247,8 +247,8 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
 
   auto db = sys_db.createDatabase({.name = db_name,
                                    .replication_factor = json.get_value_or<int>("replication_factor", 1),
-                                   .sharding = "flexible",
                                    .write_concern = json.get_value_or<int>("write_concern", 1),
+                                   .sharding = "flexible",
                                    .allow_conflict = true});
 
   database_ = connection_.database(db_name);
@@ -280,7 +280,7 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
       auto name = naming_schema;
       name = std::regex_replace(name, std::regex("\\{id\\}"), std::to_string(no));
       auto sharding = randomInterval(sharding_interval);
-      auto collection = database_.createCollection({.name = name, .shard_count = sharding, .edge = true});
+      auto collection = database_.createCollection({.name = name, .edge = true, .shard_count = sharding });
       std::cout << "Created edge collection: " << name << std::endl;
       edge_collections_.insert_or_assign(name, collection);
     }
