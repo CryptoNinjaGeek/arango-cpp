@@ -1,16 +1,16 @@
 #pragma once
 
-#include "ProgressBar.h"
+#include <indicators/cursor_control.hpp>
+#include <indicators/block_progress_bar.hpp>
 
-class ProgressLine : public ProgressBar {
+class ProgressLine : public indicators::BlockProgressBar {
  public:
-  ProgressLine(std::string label, int n) : ProgressBar(n) {
-    std::cout << label << " ";
-    set_todo_char(" ");
-    set_done_char("█");
-    set_opening_bracket_char("{");
-    set_closing_bracket_char("}");
-  }
+  ProgressLine(std::string label, int n)
+      : indicators::BlockProgressBar(indicators::option::BarWidth{80}, indicators::option::ForegroundColor{indicators::Color::white},
+                                     indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}},
+                                     indicators::option::MaxProgress{n}) {
+    this->set_option(indicators::option::PostfixText{label});
+  };
 
-  virtual ~ProgressLine() { std::cout << std::endl; }
+  virtual ~ProgressLine() { mark_as_completed(); }
 };

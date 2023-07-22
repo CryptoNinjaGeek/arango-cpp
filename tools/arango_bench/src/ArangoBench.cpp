@@ -75,10 +75,19 @@ auto ArangoBench::shutdown() -> bool {
 
   auto containers = controller.list_containers({.all = true, .filters = label});
   if (!containers.empty()) {
-    ProgressLine bar("Stopping and removing controllers", containers.size());
+    ProgressLine bar("Stopping containers", containers.size());
     for (auto container_id : containers) {
-      if (controller.stop_container({.id = container_id, .timeout = 5})) controller.remove_container(container_id);
-      bar.update();
+      controller.stop_container({.id = container_id, .timeout = 5});
+      bar.tick();
+    }
+  }
+
+  containers = controller.list_containers({.all = true, .filters = label});
+  if (!containers.empty()) {
+    ProgressLine bar("Removing containers", containers.size());
+    for (auto container_id : containers) {
+      controller.remove_container(container_id);
+      bar.tick();
     }
   }
 
@@ -87,7 +96,7 @@ auto ArangoBench::shutdown() -> bool {
     ProgressLine bar("Removing networks", networks.size());
     for (auto networks_id : networks) {
       controller.remove_network(networks_id);
-      bar.update();
+      bar.tick();
     }
   }
 
@@ -96,7 +105,7 @@ auto ArangoBench::shutdown() -> bool {
     ProgressLine bar("Removing volumes", volumes.size());
     for (auto volumes_id : volumes) {
       controller.remove_volume(volumes_id);
-      bar.update();
+      bar.tick();
     }
   }
 
@@ -222,12 +231,11 @@ auto ArangoBench::startDockerContainer(StartDockerContainer input) -> bool {
                                                    .image = input.image,
                                                    .port = input.port,
                                                    .volume = fmt::format("{}:/var/lib/arangodb", volume_id.c_str()),
-                                                  .command = command,
-                                                  .environment = environment,
-                                                   .labels = labels
-  });
+                                                   .command = command,
+                                                   .environment = environment,
+                                                   .labels = labels});
 
-  controller.connect_container_to_network({.network = input.network_id,.container = container_id});
+  controller.connect_container_to_network({.network = input.network_id, .container = container_id});
   controller.start_container(container_id);
 
   return true;
@@ -280,7 +288,7 @@ auto ArangoBench::createSchema(jsoncons::json& json) -> bool {
       auto name = naming_schema;
       name = std::regex_replace(name, std::regex("\\{id\\}"), std::to_string(no));
       auto sharding = randomInterval(sharding_interval);
-      auto collection = database_.createCollection({.name = name, .edge = true, .shard_count = sharding });
+      auto collection = database_.createCollection({.name = name, .edge = true, .shard_count = sharding});
       std::cout << "Created edge collection: " << name << std::endl;
       edge_collections_.insert_or_assign(name, collection);
     }

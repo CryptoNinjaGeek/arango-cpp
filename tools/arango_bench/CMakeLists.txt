@@ -17,13 +17,20 @@ FetchContent_Declare(
         GIT_TAG 10.0.0
 )
 
+FetchContent_Declare(
+        indicators
+        GIT_REPOSITORY https://github.com/p-ranav/indicators.git
+        GIT_TAG v2.3
+)
+
+
 FetchContent_MakeAvailable(cxxopts)
 FetchContent_MakeAvailable(fmt)
 FetchContent_MakeAvailable(cpr)
+FetchContent_MakeAvailable(indicators)
 
 add_executable(arango_bench
         src/main.cpp
-        include/ProgressBar.h
         include/Input.h
         include/Tools.h
         include/ArangoBench.h
@@ -40,5 +47,5 @@ add_executable(arango_bench
         include/static_names.h
         include/ProgressLine.h
 )
-target_link_libraries(arango_bench PUBLIC zutano cxxopts cpr::cpr fmt::fmt)
+target_link_libraries(arango_bench PUBLIC zutano cxxopts cpr::cpr fmt::fmt indicators::indicators)
 target_include_directories(arango_bench PRIVATE ./include ./include/docker)
