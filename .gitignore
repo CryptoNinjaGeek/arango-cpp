@@ -1,5 +1,7 @@
 build
 .DS_Store
 .idea
+_deps
+CMakeFiles
 cmake-build-debug
 cmake-build-release
