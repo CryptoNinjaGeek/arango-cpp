@@ -341,7 +341,7 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
   for (auto at = 0; at < document_collections_.size(); at++) {
     auto collection = document_collections_.at(at);
     auto count = randomInterval(count_interval);
-    ProgressLine bar(fmt::format("{} ({}/{})", collection.name(), at + 1, document_collections_.size()), count);
+    ProgressLine bar(fmt::format("{} {} documents ({}/{})", collection.name(), count, at + 1, document_collections_.size()), count);
 
     std::vector<std::string> ids;
     while (count > 0) {
@@ -389,7 +389,7 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
     auto count = randomInterval(count_interval);
     auto org_count = count;
     std::unordered_set<std::string> edges;
-    ProgressLine bar(fmt::format("{} ({}/{})", name, at + 1, graphs.size()), count);
+    ProgressLine bar(fmt::format("{} {} documents ({}/{})", name, count, at + 1, graphs.size()), count);
 
     while (count > 0) {
       auto request = 0;
