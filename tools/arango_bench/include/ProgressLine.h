@@ -6,7 +6,7 @@
 class ProgressLine : public indicators::BlockProgressBar {
  public:
   ProgressLine(std::string label, int n)
-      : indicators::BlockProgressBar(indicators::option::BarWidth{80}, indicators::option::ForegroundColor{indicators::Color::white},
+      : indicators::BlockProgressBar(indicators::option::BarWidth{80}, indicators::option::ForegroundColor{indicators::Color::yellow},
                                      indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}},
                                      indicators::option::MaxProgress{n}) {
     this->set_option(indicators::option::PostfixText{label});
