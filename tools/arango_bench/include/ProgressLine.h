@@ -12,5 +12,10 @@ class ProgressLine : public indicators::BlockProgressBar {
     this->set_option(indicators::option::PostfixText{label});
   };
 
-  virtual ~ProgressLine() { mark_as_completed(); }
+  virtual ~ProgressLine() { set_done(); }
+
+  void set_done() {
+    set_option(indicators::option::ForegroundColor{indicators::Color::green});
+    indicators::BlockProgressBar::mark_as_completed();
+  }
 };
