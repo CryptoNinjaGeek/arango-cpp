@@ -338,9 +338,10 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
   auto count_interval = documents.get_value_or<std::pair<int, int>>("count", std::pair<int, int>(1, 1));
   auto content = documents.get_value_or<jsoncons::json>("content", jsoncons::json());
 
-  for (auto collection : document_collections_) {
+  for (auto at = 0; at < document_collections_.size(); at++) {
+    auto collection = document_collections_.at(at);
     auto count = randomInterval(count_interval);
-    ProgressLine bar(collection.name(), count);
+    ProgressLine bar(fmt::format("{} ({}/{})", collection.name(), at + 1, document_collections_.size()), count);
 
     std::vector<std::string> ids;
     while (count > 0) {
@@ -363,7 +364,8 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
     collection_ids_.insert_or_assign(collection.name(), ids);
   }
 
-  for (auto& graph : graphs.array_range()) {
+  for (auto at = 0; at < graphs.size(); at++) {
+    auto graph = graphs.at(at);
     auto name = graph.get_value_or<std::string>("name", "");
     auto from = graph.get_value_or<std::string>("from", "");
     auto to = graph.get_value_or<std::string>("to", "");
@@ -387,7 +389,7 @@ auto ArangoBench::createData(jsoncons::json& json) -> bool {
     auto count = randomInterval(count_interval);
     auto org_count = count;
     std::unordered_set<std::string> edges;
-    ProgressLine bar(name, count);
+    ProgressLine bar(fmt::format("{} ({}/{})", name, at + 1, graphs.size()), count);
 
     while (count > 0) {
       auto request = 0;
