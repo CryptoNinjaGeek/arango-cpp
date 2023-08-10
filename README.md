@@ -1,4 +1,3 @@
-![Logo](https://www.arangodb.com/wp-content/uploads/2022/06/ArangoDB-dark-logo-2022.png)
 
 [![Tests](https://github.com/CryptoNinjaGeek/zutano/actions/workflows/cmake.yml/badge.svg)](https://github.com/CryptoNinjaGeek/zutano/actions/workflows/cmake.yml)
 
