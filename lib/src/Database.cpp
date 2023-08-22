@@ -24,9 +24,7 @@ class DatabasePimpl : public PrivateImpl {
   std::string name_;
 
  public:
-  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) {
-    return std::dynamic_pointer_cast<DatabasePimpl>(p);
-  }
+  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<DatabasePimpl>(p); }
 };
 
 Database::Database(const Connection& conn, std::string name) {
@@ -102,17 +100,11 @@ auto Database::createCollection(input::CollectionCreateInput input) -> arangocpp
   if (input.computed_values) data["computedValues"] = input.computed_values.value();
 
   std::vector<string_pair> params;
-  if (input.sync_replication)
-    params.emplace_back("waitForSyncReplication", std::to_string(input.sync_replication.value()));
+  if (input.sync_replication) params.emplace_back("waitForSyncReplication", std::to_string(input.sync_replication.value()));
   if (input.enforce_replication_factor)
     params.emplace_back("enforceReplicationFactor", std::to_string(input.enforce_replication_factor.value()));
 
-  auto r = Request()
-               .method(HttpMethod::POST)
-               .database(p->name_)
-               .endpoint("/collection")
-               .parameters(params)
-               .data(data.to_string());
+  auto r = Request().method(HttpMethod::POST).database(p->name_).endpoint("/collection").parameters(params).data(data.to_string());
 
   auto response = p->connection_.sendRequest(r);
   if (response.contains({401, 403}))
@@ -152,8 +144,7 @@ auto Database::execute(input::ExecuteInput input) -> Cursor {
   if (input.intermediate_commit_size) options["intermediateCommitSize"] = input.intermediate_commit_size.value();
   if (input.satellite_sync_wait) options["satelliteSyncWait"] = input.satellite_sync_wait.value();
   if (input.stream) options["stream"] = tools::toString(input.stream.value());
-  if (input.skip_inaccessible_cols)
-    options["skipInaccessibleCollections"] = tools::toString(input.skip_inaccessible_cols.value());
+  if (input.skip_inaccessible_cols) options["skipInaccessibleCollections"] = tools::toString(input.skip_inaccessible_cols.value());
   if (input.max_runtime) options["maxRuntime"] = input.max_runtime.value();
 
   if (not options.empty()) data["options"] = options;
@@ -225,8 +216,7 @@ auto Database::validate(std::string query) -> jsoncons::json {
 auto Database::kill(std::string query_id) -> bool {
   auto p = DatabasePimpl::pimpl(p_);
 
-  auto r =
-      Request().method(HttpMethod::DELETE).database(p->name_).handle(std::move(query_id)).endpoint("/query/{handle}");
+  auto r = Request().method(HttpMethod::DELETE).database(p->name_).handle(std::move(query_id)).endpoint("/query/{handle}");
 
   auto response = p->connection_.sendRequest(r);
   if (response.contains({401, 403}))
@@ -353,12 +343,7 @@ auto Database::deleteFunction(const input::DeleteFunctionInput& input) -> jsonco
 
   params.emplace_back("group", tools::toString(input.group));
 
-  auto r = Request()
-               .method(HttpMethod::DELETE)
-               .database(p->name_)
-               .handle(input.name)
-               .parameters(params)
-               .endpoint("/aqlfunction/{handle}");
+  auto r = Request().method(HttpMethod::DELETE).database(p->name_).handle(input.name).parameters(params).endpoint("/aqlfunction/{handle}");
 
   auto response = p->connection_.sendRequest(r);
   if (response.contains({401, 403}))
@@ -385,6 +370,57 @@ auto Database::queryRules() -> jsoncons::json {
     throw ServerError(response.errorMessage(), response.errorCode());
 
   return response.body();
+}
+
+auto Database::createGraph(input::GraphCreateInput input) -> Graph {
+  auto p = DatabasePimpl::pimpl(p_);
+
+  if (input.name.empty()) throw ClientError("createGraph => graph name cannot be empty");
+
+  jsoncons::json data = to_json{
+      {"name", input.name},
+  };
+
+  jsoncons::json array(jsoncons::json_array_arg);
+
+  for (const auto& orphan : input.orphan_collections.value_or(std::vector<std::string>())) {
+    array.push_back(orphan);
+  }
+  if (!array.empty()) data["orphanCollections"] = array;
+
+  jsoncons::json edges(jsoncons::json_array_arg);
+  for (auto edgeDefinition : input.edge_definitions) {
+    jsoncons::json edge_definition =
+        to_json{{"collection", edgeDefinition.collection}, {"from", edgeDefinition.from}, {"to", edgeDefinition.to}};
+    edges.push_back(edge_definition);
+  }
+  if (!edges.empty()) data["edgeDefinitions"] = edges;
+
+  if (input.is_disjoint) data["isDisjoint"] = input.is_disjoint.value();
+  if (input.is_smart) data["isSmart"] = input.is_smart.value();
+  if (input.smart_graph_attribute) data["smartGraphAttribute"] = input.smart_graph_attribute.value();
+  if (input.satellites) data["satellites"] = input.satellites.value();
+  if (input.replication_factor) data["replicationFactor"] = input.replication_factor.value();
+  if (input.write_concern) data["writeConcern"] = input.write_concern.value();
+  if (input.number_of_shards) data["numberOfShards"] = input.number_of_shards.value();
+
+  std::vector<string_pair> params;
+  params.emplace_back("waitForSync", std::to_string(input.wait_for_sync));
+
+  auto r = Request().method(HttpMethod::POST).database(p->name_).endpoint("/gharial").parameters(params).data(data.to_string());
+
+  auto response = p->connection_.sendRequest(r);
+  if (response.contains({401, 403}))
+    throw AuthenticationError();
+  else if (not response.isSuccess() && (response.httpCode() != 409))
+    throw ServerError(response.errorMessage(), response.errorCode());
+
+  return {p->connection_, *this, input.name};
+}
+
+auto Database::graph(std::string name) -> Graph {
+  auto p = DatabasePimpl::pimpl(p_);
+  return {p->connection_, *this, std::move(name)};
 }
 
 }  // namespace arango-cpp

@@ -117,12 +117,7 @@ auto Collection::update(const jsoncons::json& doc, input::UpdateInput input) -> 
 
   if (input.sync) params.emplace_back("waitForSync", tools::toString(input.sync.value()));
 
-  auto r = Request()
-               .method(HttpMethod::PATCH)
-               .database(p->db_.name())
-               .collection(p->name_)
-               .parameters(params)
-               .data(doc.to_string());
+  auto r = Request().method(HttpMethod::PATCH).database(p->db_.name()).collection(p->name_).parameters(params).data(doc.to_string());
 
   if (doc.is_array())
     r = r.endpoint(std::string("/document/{collection}/"));
@@ -153,12 +148,7 @@ auto Collection::replace(const jsoncons::json& doc, input::ReplaceInput input) -
 
   if (input.sync) params.emplace_back("waitForSync", tools::toString(input.sync.value()));
 
-  auto r = Request()
-               .method(HttpMethod::PUT)
-               .database(p->db_.name())
-               .collection(p->name_)
-               .parameters(params)
-               .data(doc.to_string());
+  auto r = Request().method(HttpMethod::PUT).database(p->db_.name()).collection(p->name_).parameters(params).data(doc.to_string());
 
   if (doc.is_array())
     r = r.endpoint(std::string("/document/{collection}/"));
@@ -211,16 +201,17 @@ auto Collection::getHandleFromDocument(jsoncons::json doc) -> std::string {
 auto Collection::truncate() -> bool {
   auto p = pimp::CollectionPimpl::pimpl(p_);
 
-  auto r = Request()
-               .method(HttpMethod::PUT)
-               .database(p->db_.name())
-               .collection(p->name_)
-               .endpoint("/collection/{collection}/truncate");
+  auto r = Request().method(HttpMethod::PUT).database(p->db_.name()).collection(p->name_).endpoint("/collection/{collection}/truncate");
 
   auto response = p->connection_.sendRequest(r);
   if (not response.isSuccess()) throw ServerError(response.errorMessage(), response.errorCode());
 
   return true;
+}
+
+auto Collection::name() -> std::string {
+  auto p = pimp::CollectionPimpl::pimpl(p_);
+  return p->name_;
 }
 
 }  // namespace arango-cpp

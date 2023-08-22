@@ -14,7 +14,7 @@
 #include <utility>
 
 // #define DEBUG_OUTPUT
-// #define DEBUG_OUTPUT_URL
+//  #define DEBUG_OUTPUT_URL
 
 namespace arangocpp {
 
@@ -31,7 +31,18 @@ class ConnectionPimpl : public PrivateImpl {
  public:
   static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<ConnectionPimpl>(p); }
 
-  auto host() -> std::string { return this->endpoints_.at(last_++ % this->endpoints_.size()); }
+  auto host() -> std::string {
+    if (!endpoints_.empty())
+      return this->endpoints_.at(last_++ % this->endpoints_.size());
+    else
+      return {};
+  }
+
+  auto debug() -> void {
+    for (const auto& host : endpoints_) {
+      std::cout << host << std::endl;
+    }
+  }
 
  private:
   unsigned long last_ = 0;
@@ -137,32 +148,45 @@ auto Connection::sendRequest(Request request) -> Response {
   if (!p->certificate_.empty()) session.SetSslOptions(cpr::Ssl(cpr::ssl::PinnedPublicKey{p->certificate_.c_str()}));
 
   cpr::Response r;
-  switch (request.method()) {
-    case HttpMethod::GET:
-      r = session.Get();
-      break;
-    case HttpMethod::POST:
-      r = session.Post();
-      break;
-    case HttpMethod::PUT:
-      r = session.Put();
-      break;
-    case HttpMethod::DELETE:
-      r = session.Delete();
-      break;
-    case HttpMethod::PATCH:
-      r = session.Patch();
-      break;
-    case HttpMethod::HEAD:
-      r = session.Head();
-      break;
-  }
+  bool retry;
+  int retry_cnt{0};
+  std::vector<int> retry_codes{0, 503};
+
+  do {
+    switch (request.method()) {
+      case HttpMethod::GET:
+        r = session.Get();
+        break;
+      case HttpMethod::POST:
+        r = session.Post();
+        break;
+      case HttpMethod::PUT:
+        r = session.Put();
+        break;
+      case HttpMethod::DELETE:
+        r = session.Delete();
+        break;
+      case HttpMethod::PATCH:
+        r = session.Patch();
+        break;
+      case HttpMethod::HEAD:
+        r = session.Head();
+        break;
+    }
 
 #ifdef DEBUG_OUTPUT
-  std::cout << r.raw_header << std::endl;
-  std::cout << r.status_code << std::endl;
-  std::cout << r.text << std::endl;
+    if (r.status_code) {
+      std::cout << r.raw_header << std::endl;
+      std::cout << r.status_code << std::endl;
+      std::cout << r.text << std::endl;
+    }
 #endif
+    retry = std::count(retry_codes.begin(), retry_codes.end(), r.status_code) && retry_cnt++ < 10;
+    if (retry) {
+      std::cout << "Unable to connect(" << retry_cnt << "), retry in 5s" << std::endl;
+      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    }
+  } while (retry);
 
   jsoncons::json j;
   if (not r.text.empty()) j = jsoncons::json::parse(r.text);
@@ -187,6 +211,7 @@ auto Connection::ping() -> long {
   auto r = Request().method(HttpMethod::GET).endpoint("/collection");
 
   auto response = sendRequest(r);
+
   if (response.contains({401, 403}))
     throw AuthenticationError();
   else if (not response.isSuccess())

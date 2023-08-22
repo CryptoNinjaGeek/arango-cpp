@@ -4,6 +4,7 @@
 #include <vector>
 #include <arango-cpp/PrivateImpl.h>
 #include <arango-cpp/Collection.h>
+#include <arango-cpp/Graph.h>
 #include <arango-cpp/Cursor.h>
 #include <jsoncons/json.hpp>
 #include <arango-cpp/input/DatabaseInput.h>
@@ -20,39 +21,27 @@ class Database {
 
   // Query functions
   auto execute(input::ExecuteInput) -> Cursor;
-
   auto explain(input::ExplainInput) -> jsoncons::json;
-
   auto validate(std::string) -> jsoncons::json;
-
   auto kill(std::string) -> bool;
-
   auto queries() -> jsoncons::json;
-
   auto slowQueries() -> jsoncons::json;
-
   auto clearSlowQueries() -> bool;
-
   auto tracking() -> jsoncons::json;
-
   auto setTracking(input::TrackingInput) -> jsoncons::json;
-
   auto functions() -> jsoncons::json;
-
   auto createFunction(const input::CreateFunctionInput&) -> jsoncons::json;
-
   auto deleteFunction(const input::DeleteFunctionInput&) -> jsoncons::json;
-
   auto queryRules() -> jsoncons::json;
 
   // Create functions
   auto createDatabase(input::DatabaseCreateInput) -> Database;
-
   auto createCollection(input::CollectionCreateInput) -> Collection;
+  auto createGraph(input::GraphCreateInput) -> Graph;
 
   // Access functions
   auto collection(std::string) -> Collection;
-
+  auto graph(std::string) -> Graph;
   auto name() -> std::string;
 
  private:

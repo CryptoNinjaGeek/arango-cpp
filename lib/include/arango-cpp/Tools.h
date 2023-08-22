@@ -1,5 +1,6 @@
 #pragma once
 
+#include <jsoncons/json.hpp>
 #include <string>
 #include <iostream>
 
@@ -18,7 +19,6 @@ inline std::string rtrim(const std::string& s) {
 }
 
 inline std::string trim(const std::string& s) { return rtrim(ltrim(s)); }
-
 inline std::string toString(bool b) { return b ? "true" : "false"; }
 
 inline bool replace(std::string& str, const std::string& from, const std::string& to) {
@@ -28,7 +28,7 @@ inline bool replace(std::string& str, const std::string& from, const std::string
   return true;
 }
 
-inline std::string toArray(jsoncons::json doc) {
+inline std::string toArray(const jsoncons::json& doc) {
   if (!doc.is_array()) {
     return std::string("[") + doc.to_string() + std::string("]");
   } else
@@ -40,7 +40,7 @@ inline std::string removeLastSlash(std::string str) {
   return str;
 }
 
-inline std::vector<std::string> split(std::string str, char sep) {
+inline std::vector<std::string> split(const std::string& str, char sep) {
   std::vector<std::string> strings;
   std::istringstream f(str);
   std::string s;
@@ -50,5 +50,10 @@ inline std::vector<std::string> split(std::string str, char sep) {
   return strings;
 }
 
-typedef std::map<std::string, std::variant<std::string, bool, int, char, double, long, std::vector<std::string>>> to_json;
+typedef std::map<std::string, std::string> value_map;
+
+typedef std::map<std::string,
+                 std::variant<std::string, bool, int, char, double, long, std::vector<std::string>, std::map<std::string, std::string>>>
+    to_json;
+
 }  // namespace arangocpp::tools

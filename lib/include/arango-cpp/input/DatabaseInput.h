@@ -23,6 +23,26 @@ struct DatabaseCreateInput {
   bool allow_conflict{true};
 };
 
+struct edgeDefinitions {
+  std::string collection;
+  std::vector<std::string> from;
+  std::vector<std::string> to;
+};
+
+struct GraphCreateInput {
+  std::string name;
+  bool wait_for_sync{true};
+  std::optional<bool> is_smart;
+  std::optional<bool> is_disjoint;
+  std::optional<std::string> smart_graph_attribute;
+  std::optional<std::string> satellites;
+  std::optional<int> number_of_shards;
+  std::optional<int> replication_factor;
+  std::optional<int> write_concern;
+  std::optional<std::vector<std::string>> orphan_collections;
+  std::vector<edgeDefinitions> edge_definitions;
+};
+
 struct CollectionCreateInput {
   std::string name;
   bool sync{false};

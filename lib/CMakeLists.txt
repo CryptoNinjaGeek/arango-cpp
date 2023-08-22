@@ -27,22 +27,27 @@ add_library(arango-cpp SHARED
         src/Connection.cpp
         src/Database.cpp
         src/Collection.cpp
+        src/Graph.cpp
         src/Request.cpp
         src/Response.cpp
         src/Index.cpp
+        src/Cursor.cpp
         include/arango-cpp/input/DocumentInput.h
         include/arango-cpp/input/DocumentInput.h
         include/arango-cpp/input/IndexInput.h
-        src/Cursor.cpp include/arango-cpp/Cursor.h)
+        include/arango-cpp/Cursor.h
+)
+
+add_library(arangocpp::arangocpp ALIAS arango-cpp)
 
 target_link_libraries(arango-cpp PRIVATE
         cpr::cpr
-        )
+)
 
 target_link_libraries(arango-cpp PUBLIC
         jsoncons
-        )
+)
 
 target_include_directories(arango-cpp PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include/
-        )
+)
