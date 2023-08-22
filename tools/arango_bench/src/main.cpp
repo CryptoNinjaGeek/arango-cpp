@@ -1,4 +1,4 @@
-#include <zutano/zutano.h>
+#include <arango-cpp/arango-cpp.h>
 #include <cxxopts.hpp>
 #include <fstream>
 
@@ -6,7 +6,7 @@
 #include "Tools.h"
 #include "ArangoBench.h"
 
-using namespace zutano::tools;
+using namespace arangocpp::tools;
 
 auto main(int argc, char* argv[]) -> int {
   arango_bench::Input input;

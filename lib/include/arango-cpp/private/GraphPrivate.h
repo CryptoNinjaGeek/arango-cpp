@@ -1,10 +1,10 @@
 #pragma one
 
-#include <zutano/PrivateImpl.h>
-#include <zutano/Connection.h>
-#include <zutano/Database.h>
+#include <arango-cpp/PrivateImpl.h>
+#include <arango-cpp/Connection.h>
+#include <arango-cpp/Database.h>
 
-namespace zutano::pimp {
+namespace arangocpp::pimp {
 class GraphPimpl : public PrivateImpl {
  public:
   Connection connection_;

@@ -2,11 +2,11 @@
 // Created by Carsten Tang on 19/03/2023.
 //
 
-#include <zutano/Connection.h>
-#include <zutano/Database.h>
-#include <zutano/Types.h>
-#include <zutano/Exceptions.h>
-#include <zutano/Tools.h>
+#include <arango-cpp/Connection.h>
+#include <arango-cpp/Database.h>
+#include <arango-cpp/Types.h>
+#include <arango-cpp/Exceptions.h>
+#include <arango-cpp/Tools.h>
 
 #include <cpr/cpr.h>
 #include <iostream>
@@ -16,7 +16,8 @@
 // #define DEBUG_OUTPUT
 //  #define DEBUG_OUTPUT_URL
 
-namespace zutano {
+namespace arangocpp {
+
 class ConnectionPimpl : public PrivateImpl {
  public:
   std::vector<std::string> endpoints_;
@@ -82,7 +83,7 @@ auto Connection::jwt(std::string jwt_token) -> Connection& {
   return *this;
 }
 
-auto Connection::database(std::string name) -> zutano::Database { return {*this, std::move(name)}; }
+auto Connection::database(std::string name) -> arangocpp::Database { return {*this, std::move(name)}; }
 
 auto Connection::sendRequest(Request request) -> Response {
   auto p = ConnectionPimpl::pimpl(p_);
@@ -199,7 +200,7 @@ auto Connection::sendRequest(Request request) -> Response {
 
 auto Connection::standardHeaders(std::vector<string_pair>& header) -> void {
   auto driver_version = std::string("0.0.1");
-  auto driver_header = std::string("zutano/") + driver_version;
+  auto driver_header = std::string("arango-cpp/") + driver_version;
 
   header.emplace_back("Content-Type", "application/json");
   header.emplace_back("charset", "utf-8");
@@ -224,4 +225,4 @@ auto Connection::certificate(std::string certificate) -> Connection& {
   return *this;
 }
 
-}  // namespace zutano
+}  // namespace arango-cpp

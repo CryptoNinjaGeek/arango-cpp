@@ -5,7 +5,7 @@
 #include <map>
 #include <optional>
 
-namespace zutano::input {
+namespace arangocpp::input {
 
 struct UserInput {
   std::string username;
@@ -119,4 +119,4 @@ struct DeleteFunctionInput {
   bool ignore_missing{false};
 };
 
-}  // namespace zutano::input
+} // arango-cpp

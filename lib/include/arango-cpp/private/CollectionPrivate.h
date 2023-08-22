@@ -1,10 +1,10 @@
 #pragma one
 
-#include <zutano/PrivateImpl.h>
-#include <zutano/Connection.h>
-#include <zutano/Database.h>
+#include <arango-cpp/PrivateImpl.h>
+#include <arango-cpp/Connection.h>
+#include <arango-cpp/Database.h>
 
-namespace zutano::pimp {
+namespace arangocpp::pimp {
 class CollectionPimpl : public PrivateImpl {
  public:
   Connection connection_;
@@ -15,4 +15,4 @@ class CollectionPimpl : public PrivateImpl {
     return std::dynamic_pointer_cast<CollectionPimpl>(p);
   }
 };
-}  // namespace zutano::pimp
+}  // namespace arangocpp::pimp

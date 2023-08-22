@@ -2,14 +2,14 @@
 // Created by Carsten Tang on 19/03/2023.
 //
 
-#include <zutano/Collection.h>
-#include <zutano/Connection.h>
-#include <zutano/Exceptions.h>
-#include <zutano/Tools.h>
+#include <arango-cpp/Collection.h>
+#include <arango-cpp/Connection.h>
+#include <arango-cpp/Exceptions.h>
+#include <arango-cpp/Tools.h>
 
-#include <zutano/private/CollectionPrivate.h>
+#include <arango-cpp/private/CollectionPrivate.h>
 
-namespace zutano {
+namespace arangocpp {
 
 auto Collection::addHashIndex(input::IndexCreateInput input) -> jsoncons::json {
   auto p = pimp::CollectionPimpl::pimpl(p_);
@@ -172,4 +172,4 @@ auto Collection::addIndex(const jsoncons::json& data) -> jsoncons::json {
   return response.body();
 }
 
-}  // namespace zutano
+}  // namespace arango-cpp

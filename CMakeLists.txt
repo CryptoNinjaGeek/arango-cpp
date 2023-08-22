@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(zutano CXX)
+project(arango-cpp CXX)
 
 option(ZUTANO_TESTS "Build Tests" ON)
 option(ZUTANO_EXAMPLES "Build EXAMPLES" ON)

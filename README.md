@@ -1,8 +1,7 @@
-![Logo](https://www.arangodb.com/wp-content/uploads/2022/06/ArangoDB-dark-logo-2022.png)
 
-[![Tests](https://github.com/CryptoNinjaGeek/zutano/actions/workflows/cmake.yml/badge.svg)](https://github.com/CryptoNinjaGeek/zutano/actions/workflows/cmake.yml)
+[![Tests](https://github.com/CryptoNinjaGeek/arango-cpp/actions/workflows/cmake.yml/badge.svg)](https://github.com/CryptoNinjaGeek/arango-cpp/actions/workflows/cmake.yml)
 
-# Zutano
+# Arango-Cpp
 
 C++ driver for [ArangoDB](https://www.arangodb.com), a scalable multi-model
 Database natively supporting documents, graphs and search.

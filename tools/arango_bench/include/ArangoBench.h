@@ -2,7 +2,7 @@
 
 #include <string>
 #include <random>
-#include <zutano/Connection.h>
+#include <arango-cpp/Connection.h>
 #include <jsoncons/json.hpp>
 
 #include "Input.h"
@@ -32,11 +32,11 @@ class ArangoBench {
   inline auto randomInterval(std::pair<int, int>& interval) -> int;
 
  private:
-  std::vector<zutano::Collection> document_collections_;
-  std::map<std::string, zutano::Collection> edge_collections_;
+  std::vector<arangocpp::Collection> document_collections_;
+  std::map<std::string, arangocpp::Collection> edge_collections_;
   std::map<std::string, std::vector<std::string>> collection_ids_;
-  zutano::Connection connection_;
-  zutano::Database database_;
+  arangocpp::Connection connection_;
+  arangocpp::Database database_;
   Input input_;
   jsoncons::json config_;
   std::mt19937 rand_source_;

@@ -47,5 +47,5 @@ add_executable(arango_bench
         include/static_names.h
         include/ProgressLine.h
 )
-target_link_libraries(arango_bench PUBLIC zutano cxxopts cpr::cpr fmt::fmt indicators::indicators)
+target_link_libraries(arango_bench PUBLIC arango-cpp cxxopts cpr::cpr fmt::fmt indicators::indicators)
 target_include_directories(arango_bench PRIVATE ./include ./include/docker)

@@ -9,5 +9,5 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(cxxopts)
 
 add_executable(arango_import src/main.cpp include/ProgressBar.h include/Input.h include/Tools.h include/ArangoImport.h src/ArangoImport.cpp src/ImportCSV.cpp)
-target_link_libraries(arango_import PUBLIC zutano cxxopts)
+target_link_libraries(arango_import PUBLIC arango-cpp cxxopts)
 target_include_directories(arango_import PRIVATE ./include)

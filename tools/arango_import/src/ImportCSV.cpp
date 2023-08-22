@@ -1,5 +1,5 @@
 #include "ArangoImport.h"
-#include <zutano/zutano.h>
+#include <arango-cpp/arango-cpp.h>
 #include <cxxopts.hpp>
 #include <iostream>
 #include <jsoncons/json.hpp>
@@ -10,14 +10,14 @@
 #include "Input.h"
 #include "Tools.h"
 
-using namespace zutano;
-using namespace zutano::tools;
+using namespace arangocpp;
+using namespace arangocpp::tools;
 using namespace jsoncons;
 using namespace jsoncons::literals;
 
 namespace arango_import {
 
-auto importCSV(zutano::Collection collection, const std::string& file_name, const input::ImportInput& input) -> unsigned long {
+auto importCSV(arangocpp::Collection collection, const std::string& file_name, const input::ImportInput& input) -> unsigned long {
   unsigned long rows_imported{0}, line_no{0};
   csv::csv_options options;
   std::shared_ptr<ProgressBar> bar;

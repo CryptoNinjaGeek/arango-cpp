@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-namespace zutano {
+namespace arangocpp {
 class PrivateImpl {
  public:
   ~PrivateImpl() = default;
@@ -12,4 +12,4 @@ class PrivateImpl {
 };
 
 typedef std::shared_ptr<PrivateImpl> private_impl_ptr;
-}  // namespace zutano
+}  // namespace arangocpp

@@ -2,12 +2,12 @@
 // Created by Carsten Tang on 19/03/2023.
 //
 
-#include <zutano/Request.h>
-#include <zutano/Tools.h>
+#include <arango-cpp/Request.h>
+#include <arango-cpp/Tools.h>
 #include <string>
 #include <utility>
 
-namespace zutano {
+namespace arangocpp {
 
 class RequestPimpl : public PrivateImpl {
  public:
@@ -131,4 +131,4 @@ auto Request::headers() -> std::vector<string_pair> {
   return p->headers_;
 }
 
-}  // namespace zutano
+}  // namespace arango-cpp

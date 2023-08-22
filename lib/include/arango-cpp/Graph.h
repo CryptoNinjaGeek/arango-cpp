@@ -1,13 +1,13 @@
 #pragma once
 
 #include <string>
-#include <zutano/PrivateImpl.h>
-#include <zutano/input/IndexInput.h>
-#include <zutano/input/DocumentInput.h>
+#include <arango-cpp/PrivateImpl.h>
+#include <arango-cpp/input/IndexInput.h>
+#include <arango-cpp/input/DocumentInput.h>
 
 #include <jsoncons/json.hpp>
 
-namespace zutano {
+namespace arangocpp {
 
 class Connection;
 class Database;
@@ -24,4 +24,4 @@ class Graph {
   private_impl_ptr p_;
 };
 
-}  // namespace zutano
+}  // namespace arango-cpp

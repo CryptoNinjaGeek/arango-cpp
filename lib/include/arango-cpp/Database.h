@@ -2,14 +2,14 @@
 
 #include <string>
 #include <vector>
-#include <zutano/PrivateImpl.h>
-#include <zutano/Collection.h>
-#include <zutano/Graph.h>
-#include <zutano/Cursor.h>
+#include <arango-cpp/PrivateImpl.h>
+#include <arango-cpp/Collection.h>
+#include <arango-cpp/Graph.h>
+#include <arango-cpp/Cursor.h>
 #include <jsoncons/json.hpp>
-#include <zutano/input/DatabaseInput.h>
+#include <arango-cpp/input/DatabaseInput.h>
 
-namespace zutano {
+namespace arangocpp {
 
 class Connection;
 class Database {
@@ -48,4 +48,4 @@ class Database {
   private_impl_ptr p_;
 };
 
-}  // namespace zutano
+}  // namespace arangocpp

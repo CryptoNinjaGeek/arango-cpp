@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-namespace zutano::tools {
+namespace arangocpp::tools {
 
 const std::string WHITESPACE = " \n\r\t\f\v";
 
@@ -55,4 +55,5 @@ typedef std::map<std::string, std::string> value_map;
 typedef std::map<std::string,
                  std::variant<std::string, bool, int, char, double, long, std::vector<std::string>, std::map<std::string, std::string>>>
     to_json;
-}  // namespace zutano::tools
+
+}  // namespace arangocpp::tools

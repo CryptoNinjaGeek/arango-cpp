@@ -1,12 +1,12 @@
 #pragma once
 
 #include <string>
-#include <zutano/Database.h>
-#include <zutano/Request.h>
-#include <zutano/Response.h>
-#include <zutano/PrivateImpl.h>
+#include <arango-cpp/Database.h>
+#include <arango-cpp/Request.h>
+#include <arango-cpp/Response.h>
+#include <arango-cpp/PrivateImpl.h>
 
-namespace zutano {
+namespace arangocpp {
 class Connection;
 class Database;
 class ResolveRecord;
@@ -33,4 +33,4 @@ class Connection {
   private_impl_ptr p_;
 };
 
-}  // namespace zutano
+}  // namespace arangocpp

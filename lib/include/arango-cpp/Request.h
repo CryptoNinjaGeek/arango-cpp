@@ -1,12 +1,12 @@
 #pragma once
 
 #include <string>
-#include <zutano/PrivateImpl.h>
-#include <zutano/Types.h>
+#include <arango-cpp/PrivateImpl.h>
+#include <arango-cpp/Types.h>
 
 #include <jsoncons/json.hpp>
 
-namespace zutano {
+namespace arangocpp {
 
 class Request {
  public:
@@ -37,4 +37,4 @@ class Request {
   private_impl_ptr p_;
 };
 
-}  // namespace zutano
+}  // namespace arangocpp

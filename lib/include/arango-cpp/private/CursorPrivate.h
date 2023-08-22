@@ -1,10 +1,10 @@
 #pragma one
 
-#include <zutano/PrivateImpl.h>
-#include <zutano/Connection.h>
-#include <zutano/Database.h>
+#include <arango-cpp/PrivateImpl.h>
+#include <arango-cpp/Connection.h>
+#include <arango-cpp/Database.h>
 
-namespace zutano::pimp {
+namespace arangocpp::pimp {
 class CursorPimpl : public PrivateImpl {
  public:
   Connection connection_;
@@ -21,4 +21,4 @@ class CursorPimpl : public PrivateImpl {
 
   static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<CursorPimpl>(p); }
 };
-}  // namespace zutano::pimp
+}  // namespace arangocpp::pimp

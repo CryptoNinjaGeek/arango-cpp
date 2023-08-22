@@ -1,5 +1,5 @@
 #include "ArangoImport.h"
-#include <zutano/zutano.h>
+#include <arango-cpp/arango-cpp.h>
 #include <cxxopts.hpp>
 #include <iostream>
 #include <jsoncons/json.hpp>
@@ -10,8 +10,8 @@
 #include "Input.h"
 #include "Tools.h"
 
-using namespace zutano;
-using namespace zutano::tools;
+using namespace arangocpp;
+using namespace arangocpp::tools;
 using namespace jsoncons;
 using namespace jsoncons::literals;
 
@@ -28,7 +28,7 @@ auto file_type(std::string name) -> input::FileType {
   return input::FileType::UNKNOWN;
 }
 
-auto importFile(zutano::Database db, const std::string& file_name, const input::ImportInput& input) -> void {
+auto importFile(arangocpp::Database db, const std::string& file_name, const input::ImportInput& input) -> void {
   auto entity_name = input.name;
   auto t0 = time::now();
   auto rows_imported{0};

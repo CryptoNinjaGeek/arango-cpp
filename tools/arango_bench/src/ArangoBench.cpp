@@ -1,8 +1,7 @@
 #include "ArangoBench.h"
-#include <zutano/zutano.h>
+#include <arango-cpp/arango-cpp.h>
 #include <cxxopts.hpp>
 #include <iostream>
-#include <zutano/zutano.h>
 #include <jsoncons/json.hpp>
 #include <fstream>
 #include <stdarg.h>  // For va_start, etc.
@@ -16,8 +15,8 @@
 
 #include "docker/Controller.h"
 
-using namespace zutano;
-using namespace zutano::tools;
+using namespace arangocpp;
+using namespace arangocpp::tools;
 using namespace jsoncons;
 using namespace jsoncons::literals;
 

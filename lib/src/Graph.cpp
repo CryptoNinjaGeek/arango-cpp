@@ -2,18 +2,18 @@
 // Created by Carsten Tang on 19/03/2023.
 //
 
-#include <zutano/Collection.h>
-#include <zutano/Connection.h>
-#include <zutano/Database.h>
-#include <zutano/Response.h>
-#include <zutano/Exceptions.h>
-#include <zutano/Tools.h>
+#include <arango-cpp/Collection.h>
+#include <arango-cpp/Connection.h>
+#include <arango-cpp/Database.h>
+#include <arango-cpp/Response.h>
+#include <arango-cpp/Exceptions.h>
+#include <arango-cpp/Tools.h>
 
-#include <zutano/private/GraphPrivate.h>
+#include <arango-cpp/private/GraphPrivate.h>
 
 #include <utility>
 
-namespace zutano {
+namespace arangocpp {
 
 Graph::Graph(const Connection& conn, const Database& db, std::string name) {
   auto p = std::make_shared<pimp::GraphPimpl>();
@@ -28,4 +28,4 @@ auto Graph::name() -> std::string {
   return p->name_;
 }
 
-}  // namespace zutano
+}  // namespace arango-cpp

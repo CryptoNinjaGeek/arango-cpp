@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace zutano {
+namespace arangocpp {
 
 enum class AuthType { NONE, BASIC_AUTH, JWT };
 
@@ -16,4 +16,4 @@ struct ResolveRecord {
   unsigned short port;
 };
 
-}  // namespace zutano
+}  // namespace arangocpp
