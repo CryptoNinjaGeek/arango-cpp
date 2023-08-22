@@ -1,4 +1,4 @@
-#include <zutano/zutano.h>
+#include <arango-cpp/arango-cpp.h>
 #include <cxxopts.hpp>
 #include <iostream>
 #include <jsoncons/json.hpp>
@@ -7,8 +7,8 @@
 
 #include "progressbar.h"
 
-using namespace zutano;
-using namespace zutano::tools;
+using namespace arangocpp;
+using namespace arangocpp::tools;
 using namespace jsoncons;
 using namespace jsoncons::literals;
 
@@ -55,7 +55,7 @@ long lineCount(const std::string& file) {
   return number_of_lines;
 }
 
-unsigned long importData(zutano::Collection collection, const std::string& file_name, const ImportInput& input) {
+unsigned long importData(arangocpp::Collection collection, const std::string& file_name, const ImportInput& input) {
   unsigned long rows_imported{0}, line_no{0};
   csv::csv_options options;
   std::shared_ptr<progressbar> bar;
@@ -96,7 +96,7 @@ unsigned long importData(zutano::Collection collection, const std::string& file_
   return rows_imported;
 }
 
-void importFile(zutano::Database db, const std::string& file_name, const ImportInput& input) {
+void importFile(arangocpp::Database db, const std::string& file_name, const ImportInput& input) {
   auto entity_name = input.name;
   auto t0 = time::now();
 

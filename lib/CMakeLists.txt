@@ -23,26 +23,26 @@ FetchContent_MakeAvailable(json)
 FetchContent_MakeAvailable(cpr)
 
 
-add_library(zutano SHARED
+add_library(arango-cpp SHARED
         src/Connection.cpp
         src/Database.cpp
         src/Collection.cpp
         src/Request.cpp
         src/Response.cpp
         src/Index.cpp
-        include/zutano/input/DocumentInput.h
-        include/zutano/input/DocumentInput.h
-        include/zutano/input/IndexInput.h
-        src/Cursor.cpp include/zutano/Cursor.h)
+        include/arango-cpp/input/DocumentInput.h
+        include/arango-cpp/input/DocumentInput.h
+        include/arango-cpp/input/IndexInput.h
+        src/Cursor.cpp include/arango-cpp/Cursor.h)
 
-target_link_libraries(zutano PRIVATE
+target_link_libraries(arango-cpp PRIVATE
         cpr::cpr
         )
 
-target_link_libraries(zutano PUBLIC
+target_link_libraries(arango-cpp PUBLIC
         jsoncons
         )
 
-target_include_directories(zutano PUBLIC
+target_include_directories(arango-cpp PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include/
         )

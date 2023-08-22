@@ -2,11 +2,11 @@
 // Created by Carsten Tang on 19/03/2023.
 //
 
-#include <zutano/private/CursorPrivate.h>
-#include <zutano/Exceptions.h>
-#include "zutano/Cursor.h"
+#include <arango-cpp/private/CursorPrivate.h>
+#include <arango-cpp/Exceptions.h>
+#include "arango-cpp/Cursor.h"
 
-namespace zutano {
+namespace arangocpp {
 
 Cursor::Cursor(const std::string& db_name, const Connection& conn, const jsoncons::json& data) {
   auto p = std::make_shared<pimp::CursorPimpl>();
@@ -148,4 +148,4 @@ auto Cursor::close(bool ignore_missing) -> bool {
   return true;
 }
 
-}  // namespace zutano
+}  // namespace arango-cpp

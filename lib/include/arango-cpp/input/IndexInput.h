@@ -4,7 +4,7 @@
 #include <vector>
 #include <optional>
 
-namespace zutano::input {
+namespace arangocpp::input {
 
 struct IndexCreateInput {
   std::vector<std::string> fields;
@@ -61,4 +61,4 @@ struct InvertedIndexCreateInput {
   std::optional<bool> search_field;
 };
 
-} // zutano
+} // arango-cpp

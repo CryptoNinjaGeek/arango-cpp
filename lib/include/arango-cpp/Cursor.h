@@ -1,14 +1,14 @@
 #pragma once
 
 #include <string>
-#include <zutano/PrivateImpl.h>
-#include <zutano/Types.h>
-#include <zutano/Connection.h>
+#include <arango-cpp/PrivateImpl.h>
+#include <arango-cpp/Types.h>
+#include <arango-cpp/Connection.h>
 
 #include <vector>
 #include <jsoncons/json.hpp>
 
-namespace zutano {
+namespace arangocpp {
 class Database;
 class Connection;
 
@@ -49,4 +49,4 @@ class Cursor {
   private_impl_ptr p_;
 };
 
-}  // namespace zutano
+}  // namespace arangocpp

@@ -4,7 +4,7 @@
 #include <vector>
 #include <optional>
 
-namespace zutano::input {
+namespace arangocpp::input {
 
 struct InsertInput {
   bool return_new{false};
@@ -50,5 +50,5 @@ struct ReplaceInput {
   bool silent{false};
 };
 
-} // zutano
+} // arango-cpp
 

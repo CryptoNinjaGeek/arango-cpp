@@ -9,4 +9,4 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(cxxopts)
 
 add_executable(arango_import arango_import.cpp progressbar.h)
-target_link_libraries(arango_import PUBLIC zutano cxxopts)
+target_link_libraries(arango_import PUBLIC arango-cpp cxxopts)

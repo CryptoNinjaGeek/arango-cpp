@@ -1,8 +1,8 @@
-#include <zutano/zutano.h>
+#include <arango-cpp/arango-cpp.h>
 #include <iostream>
 
-using namespace zutano;
-using namespace zutano::tools;
+using namespace arangocpp;
+using namespace arangocpp::tools;
 using namespace jsoncons::literals;
 
 auto main() -> int {

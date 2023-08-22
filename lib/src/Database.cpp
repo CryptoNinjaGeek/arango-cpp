@@ -2,10 +2,10 @@
 // Created by Carsten Tang on 19/03/2023.
 //
 
-#include <zutano/Database.h>
-#include <zutano/Connection.h>
-#include <zutano/Exceptions.h>
-#include <zutano/Tools.h>
+#include <arango-cpp/Database.h>
+#include <arango-cpp/Connection.h>
+#include <arango-cpp/Exceptions.h>
+#include <arango-cpp/Tools.h>
 
 #include <jsoncons/json.hpp>
 
@@ -14,9 +14,9 @@
 
 using namespace jsoncons;
 using namespace jsoncons::literals;
-using namespace zutano::tools;
+using namespace arangocpp::tools;
 
-namespace zutano {
+namespace arangocpp {
 
 class DatabasePimpl : public PrivateImpl {
  public:
@@ -72,7 +72,7 @@ auto Database::createDatabase(input::DatabaseCreateInput input) -> Database {
   return {p->connection_, input.name};
 }
 
-auto Database::createCollection(input::CollectionCreateInput input) -> zutano::Collection {
+auto Database::createCollection(input::CollectionCreateInput input) -> arangocpp::Collection {
   auto p = DatabasePimpl::pimpl(p_);
 
   if (input.name.empty()) throw ClientError("createCollection => collection name cannot be empty");
@@ -123,7 +123,7 @@ auto Database::createCollection(input::CollectionCreateInput input) -> zutano::C
   return {p->connection_, *this, input.name};
 }
 
-auto Database::collection(std::string name) -> zutano::Collection {
+auto Database::collection(std::string name) -> arangocpp::Collection {
   auto p = DatabasePimpl::pimpl(p_);
   return {p->connection_, *this, std::move(name)};
 }
@@ -387,4 +387,4 @@ auto Database::queryRules() -> jsoncons::json {
   return response.body();
 }
 
-}  // namespace zutano
+}  // namespace arango-cpp

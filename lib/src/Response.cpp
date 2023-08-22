@@ -2,13 +2,13 @@
 // Created by Carsten Tang on 19/03/2023.
 //
 
-#include <zutano/Response.h>
+#include <arango-cpp/Response.h>
 #include <algorithm>
 #include <utility>
 #include <vector>
 #include <iterator>
 
-namespace zutano {
+namespace arangocpp {
 
 class ResponsePimpl : public PrivateImpl {
  public:
@@ -76,4 +76,4 @@ auto Response::message(std::string message) -> Response {
   p->error_message_ = std::move(message);
   return *this;
 }
-}  // namespace zutano
+}  // namespace arango-cpp

@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-namespace zutano::tools {
+namespace arangocpp::tools {
 
 const std::string WHITESPACE = " \n\r\t\f\v";
 
@@ -51,4 +51,4 @@ inline std::vector<std::string> split(std::string str, char sep) {
 }
 
 typedef std::map<std::string, std::variant<std::string, bool, int, char, double, long, std::vector<std::string>>> to_json;
-}  // namespace zutano::tools
+}  // namespace arangocpp::tools
