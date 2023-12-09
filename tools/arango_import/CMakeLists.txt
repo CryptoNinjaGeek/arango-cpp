@@ -5,7 +5,6 @@ FetchContent_Declare(
         GIT_TAG v3.1.1
 )
 
-
 FetchContent_MakeAvailable(cxxopts)
 
 add_executable(arango_import src/main.cpp include/ProgressBar.h include/Input.h include/Tools.h include/ArangoImport.h src/ArangoImport.cpp src/ImportCSV.cpp)

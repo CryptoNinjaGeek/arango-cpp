@@ -1,14 +1,13 @@
+cmake_minimum_required(VERSION 3.10)
 
 FetchContent_Declare(
-        Catch2
-        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-        GIT_TAG v3.3.2 # or a later release
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG main
 )
+FetchContent_MakeAvailable(googletest)
 
-FetchContent_MakeAvailable(Catch2)
+add_executable(collection_test demo_test.cpp)
+target_link_libraries(collection_test gtest gtest_main arango-cpp)
 
-add_executable(tests demo_test.cpp)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
-include(CTest)
-include(Catch)
-catch_discover_tests(tests)
+add_test(collection_test collection_test)

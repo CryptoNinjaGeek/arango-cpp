@@ -1,12 +1,24 @@
-#include <catch2/catch_test_macros.hpp>
+#include <gtest/gtest.h>
+
+#include <arango-cpp/Collection.h>
+#include <arango-cpp/Connection.h>
+#include <arango-cpp/Database.h>
 
 #include <cstdint>
 
-uint32_t Factorial(uint32_t number) { return number <= 1 ? number : Factorial(number - 1) * number; }
+using namespace arangocpp;
 
-TEST_CASE("Factorials are computed", "[factorial]") {
-  REQUIRE(Factorial(1) == 1);
-  REQUIRE(Factorial(2) == 2);
-  REQUIRE(Factorial(3) == 6);
-  REQUIRE(Factorial(10) == 3'628'800);
+TEST(CollectionTest, Insert) {
+  Connection conn;
+  Database db(conn,"test");
+  Collection col(conn, db, "test_collection");
+
+  // Create a document to insert
+  jsoncons::json doc;
+  doc["foo"] = "bar";
+
+  // Insert the document and verify the response
+  auto response = col.insert(doc);
+  ASSERT_EQ(response["_id"], "test_id");
+  ASSERT_EQ(response["_revision"], "1");
 }
