@@ -5,9 +5,16 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/google/googletest.git
         GIT_TAG main
 )
+
+FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG 10.0.0
+)
+
 FetchContent_MakeAvailable(googletest)
 
-add_executable(collection_test demo_test.cpp)
-target_link_libraries(collection_test gtest gtest_main arango-cpp)
+add_executable(collection_test collection_test.cpp)
+target_link_libraries(collection_test fmt::fmt gtest gtest_main gmock_main arango-cpp)
 
 add_test(collection_test collection_test)
