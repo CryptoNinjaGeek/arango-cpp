@@ -91,7 +91,8 @@ auto Connection::sendRequest(Request request) -> Response {
   cpr::Session session;
   std::string url_string = p->host();
   if (not request.database().empty()) url_string += "/_db/" + request.database();
-  if (not request.endpoint().empty()) url_string += "/_api/" + request.endpoint();
+  if (request.isAdmin() && not request.endpoint().empty()) url_string += "/_admin/" + request.endpoint();
+  else if (not request.endpoint().empty()) url_string += "/_api/" + request.endpoint();
   if (not request.collection().empty()) tools::replace(url_string, "{collection}", request.collection());
   if (not request.handle().empty()) tools::replace(url_string, "{handle}", request.handle());
   if (not request.id().empty()) tools::replace(url_string, "{id}", request.id());
@@ -223,6 +224,84 @@ auto Connection::certificate(std::string certificate) -> Connection& {
   auto p = ConnectionPimpl::pimpl(p_);
   p->certificate_ = std::move(certificate);
   return *this;
+}
+
+auto Connection::databases(bool onlyWithAccess) -> std::vector<std::string> {
+  auto p = ConnectionPimpl::pimpl(p_);
+
+  Request request = Request().method(HttpMethod::GET);
+  if(onlyWithAccess)
+    request = request.endpoint("/database/user");
+  else
+    request = request.endpoint("/database");
+
+  auto response = sendRequest(request);
+
+  if (response.contains({401, 403})) {
+    throw AuthenticationError();
+  }
+  if (!response.isSuccess()) {
+    throw ServerError(response.errorMessage(), response.errorCode());
+  }
+
+  auto body = response.body();
+  auto results = body["result"];
+
+  if (results.is_array()) {
+    std::vector<std::string> list;
+    for (const auto& row : results.array_range())
+      list.emplace_back(row.as_string());
+    return list;
+  }
+  return {};
+}
+
+auto Connection::createDatabase(input::DatabaseCreateInput input) -> Database {
+  if (input.name.empty()) throw ClientError("createDatabase => database name cannot be empty");
+
+  jsoncons::json data = tools::to_json{{"name", input.name}};
+
+  jsoncons::json options;
+
+  if (input.replication_factor) options["replicationFactor"] = input.replication_factor.value();
+  if (input.write_concern) options["writeConcern"] = input.write_concern.value();
+  if (input.sharding) options["sharding"] = input.sharding.value();
+
+  if (!options.empty()) data["options"] = options;
+
+  jsoncons::json users(jsoncons::json_array_arg);
+  for (auto user : input.users) {
+    users.push_back(tools::to_json{
+        {"username", user.username},
+        {"passwd", user.password},
+        {"active", user.active},
+    });
+  }
+  if (not users.empty()) data["users"] = users;
+
+  auto r = Request().method(HttpMethod::POST).endpoint("/database").data(data.to_string());
+
+  auto response = sendRequest(r);
+  if (response.contains({401, 403}))
+    throw AuthenticationError();
+  else if (not response.isSuccess() && (response.httpCode() != 409 || not input.allow_conflict))
+    throw ServerError(response.errorMessage(), response.errorCode());
+
+  return {*this, input.name};
+}
+
+auto Connection::deleteDatabase(std::string name, input::DatabaseDeleteInput input) -> bool {
+  Request request = Request().method(HttpMethod::DELETE).handle(std::move(name)).endpoint("/database/{handle}");
+
+  auto response = sendRequest(request);
+
+  if (response.contains({401, 403}))
+    throw AuthenticationError();
+  if (response.errorCode() == 1228 and input.ignore_missing) return false;
+  if (not response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
+
+  return true;
 }
 
 }  // namespace arangocpp

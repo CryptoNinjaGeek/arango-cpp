@@ -48,6 +48,7 @@ class Database {
   auto collection(std::string) -> Collection;
   auto graph(std::string) -> Graph;
   auto name() -> std::string;
+  auto info() -> jsoncons::json;
 
   auto hasCollection(std::string) -> bool;
   auto hasDatabase(std::string name) -> bool;

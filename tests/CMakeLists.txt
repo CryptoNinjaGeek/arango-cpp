@@ -17,6 +17,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(arango_test
         collection_test.cpp
         database_test.cpp
+        backup_test.cpp
 )
 
 target_link_libraries(arango_test fmt::fmt gtest gtest_main gmock_main arango-cpp)

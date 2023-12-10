@@ -426,7 +426,7 @@ auto Database::graph(std::string name) -> Graph {
 bool Database::deleteDatabase(std::string name, input::DatabaseDeleteInput input) {
   auto p = DatabasePimpl::pimpl(p_);
 
-  Request request = Request().method(HttpMethod::DELETE).database(p->name_).handle(std::move(name)).endpoint("/database/{handle}");
+  Request request = Request().method(HttpMethod::DELETE).handle(std::move(name)).endpoint("/database/{handle}");
 
   auto response = p->connection_.sendRequest(request);
 
@@ -509,6 +509,22 @@ auto Database::hasDatabase(std::string name) -> bool{
         return true;
   }
   return false;
+}
+
+auto Database::info() -> jsoncons::json {
+  auto p = DatabasePimpl::pimpl(p_);
+
+  Request request = Request().method(HttpMethod::GET).database(p->name_).endpoint("/database/current");
+
+  auto response = p->connection_.sendRequest(request);
+
+  if (response.contains({401, 403})) {
+    throw AuthenticationError();
+  }
+  if (!response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
+  auto body = response.body();
+  return body["result"];
 }
 
 

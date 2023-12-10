@@ -95,9 +95,9 @@ TEST_F(DatabaseTest, ExplainQuery) {
   // Verify that the query was explained successfully
   ASSERT_TRUE(not explain.is_null());
 
+  auto nr_items = explain["estimatedNrItems"].as<int>();
   // Verify the execution plan
-//  ASSERT_EQ(explain.plan.size(), 1);
-//  ASSERT_EQ(explain.plan[0].type, "RETURN");
+  ASSERT_EQ(nr_items, 1);
 }
 
 TEST_F(DatabaseTest, DeleteDatabase) {

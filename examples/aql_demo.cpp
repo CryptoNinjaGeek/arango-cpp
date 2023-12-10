@@ -37,6 +37,11 @@ auto main() -> int {
       auto row = cursor.next();
       std::cout << pretty_print(row) << "\n\n";
     }
+
+    auto info = db.info();
+
+    std::cout << pretty_print(info) << std::endl;
+
   } catch (std::exception& e) {
     std::cout << e.what() << std::endl;
   }
