@@ -423,4 +423,94 @@ auto Database::graph(std::string name) -> Graph {
   return {p->connection_, *this, std::move(name)};
 }
 
+bool Database::deleteDatabase(std::string name, input::DatabaseDeleteInput input) {
+  auto p = DatabasePimpl::pimpl(p_);
+
+  Request request = Request().method(HttpMethod::DELETE).database(p->name_).handle(std::move(name)).endpoint("/database/{handle}");
+
+  auto response = p->connection_.sendRequest(request);
+
+  if (response.contains({401, 403}))
+    throw AuthenticationError();
+  if (response.errorCode() == 1228 and input.ignore_missing) return false;
+  if (not response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
+
+  return true;
+}
+
+bool Database::deleteCollection(std::string name, input::CollectionDeleteInput input) {
+  auto p = DatabasePimpl::pimpl(p_);
+
+  std::vector<string_pair> params;
+  if (input.system)
+    params.emplace_back("isSystem", std::to_string(input.system.value()));
+
+  Request request = Request()
+                        .method(HttpMethod::DELETE)
+                        .database(p->name_)
+                        .parameters(params)
+                        .handle(std::move(name))
+                        .endpoint("/collection/{handle}");
+
+  auto response = p->connection_.sendRequest(request);
+
+  if (response.errorCode() == 1202 and input.ignore_missing) return false;
+  else if (not response.isSuccess())
+    throw ServerError(response.errorMessage(), response.errorCode());
+
+  return true;
+}
+
+auto Database::hasCollection(std::string name) -> bool {
+  auto p = DatabasePimpl::pimpl(p_);
+
+  Request request = Request().method(HttpMethod::GET).database(p->name_).endpoint("/collection");
+
+  auto response = p->connection_.sendRequest(request);
+
+  if (response.contains({401, 403})) {
+    throw AuthenticationError();
+  } else if (!response.isSuccess()) {
+    throw ServerError(response.errorMessage(), response.errorCode());
+  }
+  auto body = response.body();
+  auto results = body["result"];
+
+  if (results.is_array()) {
+    for (const auto& row : results.array_range()) {
+      if( row["name"] == name )
+        return true;
+    }
+  }
+  return false;
+}
+
+auto Database::hasDatabase(std::string name) -> bool{
+  auto p = DatabasePimpl::pimpl(p_);
+
+  Request request = Request().method(HttpMethod::GET).endpoint("/database");
+
+  auto response = p->connection_.sendRequest(request);
+
+  if (response.contains({401, 403})) {
+    throw AuthenticationError();
+  }
+  if (!response.isSuccess()) {
+    throw ServerError(response.errorMessage(), response.errorCode());
+  }
+
+  auto body = response.body();
+  auto results = body["result"];
+
+  if (results.is_array()) {
+    for (const auto& row : results.array_range())
+      if( row == name )
+        return true;
+  }
+  return false;
+}
+
+
 }  // namespace arango-cpp
+

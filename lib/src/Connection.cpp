@@ -225,4 +225,4 @@ auto Connection::certificate(std::string certificate) -> Connection& {
   return *this;
 }
 
-}  // namespace arango-cpp
+}  // namespace arangocpp

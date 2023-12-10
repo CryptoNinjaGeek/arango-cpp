@@ -9,8 +9,8 @@ auto main() -> int {
   try {
     auto conn = Connection()
                     .hosts({"http://db1.google.dk:8529/", "http://db2.google.dk:8529/"})
-                    .auth("root", "EAS6wQuKbGH9kKxe")
-                    .resolve({{"db1.google.dk", "10.211.55.4", 8529}, {"db2.google.dk", "10.211.55.4", 8529}});
+                    .auth("root", "openSesame")
+                    .resolve({{"db1.google.dk", "127.0.0.1", 8529}, {"db2.google.dk", "127.0.0.1", 8529}});
 
     if (conn.ping()) std::cout << "ping'ed OK" << std::endl;
 
@@ -31,7 +31,7 @@ auto main() -> int {
     }
     students.insert(array, {.sync = false});
 
-    auto cursor = db.execute({.query = "FOR doc IN students RETURN doc", .count = true, .batch_size = 2});
+    auto cursor = db.execute({.query = "FOR doc IN students RETURN doc", .count = true, .batch_size = 3});
 
     while (cursor.hasMore()) {
       auto row = cursor.next();

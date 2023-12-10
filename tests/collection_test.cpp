@@ -42,13 +42,13 @@ class CollectionTest : public testing::Test {
 
   void TearDown() override {
     try {
+      auto sys_db = connection.database("_system");
 
-//    database.deleteDatabase();
+      sys_db.deleteDatabase("test_database");
     } catch (std::exception& e) {
       std::cout << e.what() << std::endl;
     }
   }
-
 };
 
 TEST_F(CollectionTest, Insert) {

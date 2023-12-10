@@ -33,24 +33,16 @@ auto Cursor::update(jsoncons::json data) -> bool {
   auto p = pimp::CursorPimpl::pimpl(p_);
 
   if (data.contains("id")) p->id_ = data["id"].as<std::string>();
-
   if (data.contains("type")) p->type_ = data["type"].as<std::string>();
-
   if (data.contains("count")) p->count_ = data["count"].as<long>();
-
   if (data.contains("cached")) p->cached_ = data["cached"].as<std::string>();
-
   if (data.contains("hasMore")) p->has_more_ = data["hasMore"].as<bool>();
-
   if (data.contains("cached")) p->cached_ = data["cached"].as<std::string>();
-
   if (data.contains("extra")) {
     auto extra = data["extra"];
 
     if (extra.contains("profile")) p->profile_ = extra["profile"].as<std::string>();
-
     if (extra.contains("warnings")) p->warnings_ = extra["warnings"].as<std::string>();
-
     if (extra.contains("stats")) p->stats_ = extra["stats"].as<jsoncons::json>();
   }
 
@@ -116,6 +108,9 @@ auto Cursor::next() -> jsoncons::json {
 auto Cursor::fetch() -> bool {
   auto p = pimp::CursorPimpl::pimpl(p_);
 
+  std::cout << " ----( BATCH FETCH )----"
+            << "\n\n";
+
   auto r = Request().method(HttpMethod::PUT).database(p->db_name_).handle(p->type_).id(p->id_).endpoint("/{handle}/{id}");
 
   auto response = p->connection_.sendRequest(r);
@@ -146,4 +141,4 @@ auto Cursor::close(bool ignore_missing) -> bool {
   return true;
 }
 
-}  // namespace arango-cpp
+}  // namespace arangocpp

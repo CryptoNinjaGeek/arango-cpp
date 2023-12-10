@@ -119,4 +119,12 @@ struct DeleteFunctionInput {
   bool ignore_missing{false};
 };
 
+struct DatabaseDeleteInput {
+  bool ignore_missing{false};
+};
+
+struct CollectionDeleteInput {
+  bool ignore_missing{false};
+  std::optional<bool> system;
+};
 } // arango-cpp
