@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <optional>
+#include <jsoncons/json.hpp>
 
 namespace arangocpp::input {
 

@@ -2,7 +2,6 @@
 
 #include <string>
 #include <arango-cpp/PrivateImpl.h>
-#include <arango-cpp/Types.h>
 
 #include <vector>
 #include <jsoncons/json.hpp>

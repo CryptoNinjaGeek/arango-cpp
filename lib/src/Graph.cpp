@@ -5,13 +5,8 @@
 #include <arango-cpp/Collection.h>
 #include <arango-cpp/Connection.h>
 #include <arango-cpp/Database.h>
-#include <arango-cpp/Response.h>
-#include <arango-cpp/Exceptions.h>
-#include <arango-cpp/Tools.h>
 
 #include <arango-cpp/private/GraphPrivate.h>
-
-#include <utility>
 
 namespace arangocpp {
 

@@ -2,10 +2,6 @@
 
 #include <string>
 #include <arango-cpp/PrivateImpl.h>
-#include <arango-cpp/input/IndexInput.h>
-#include <arango-cpp/input/DocumentInput.h>
-
-#include <jsoncons/json.hpp>
 
 namespace arangocpp {
 

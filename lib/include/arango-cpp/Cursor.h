@@ -2,10 +2,7 @@
 
 #include <string>
 #include <arango-cpp/PrivateImpl.h>
-#include <arango-cpp/Types.h>
-#include <arango-cpp/Connection.h>
 
-#include <vector>
 #include <jsoncons/json.hpp>
 
 namespace arangocpp {

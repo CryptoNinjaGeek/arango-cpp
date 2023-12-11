@@ -4,9 +4,7 @@
 
 #include <arango-cpp/Response.h>
 #include <algorithm>
-#include <utility>
 #include <vector>
-#include <iterator>
 
 namespace arangocpp {
 
@@ -17,8 +15,7 @@ class ResponsePimpl : public PrivateImpl {
   std::string error_message_;
   jsoncons::json body_;
 
- public:
-  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) {
+  static auto pimpl(const std::shared_ptr<PrivateImpl>& p) {
     return std::dynamic_pointer_cast<ResponsePimpl>(p);
   }
 };

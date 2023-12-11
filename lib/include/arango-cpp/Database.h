@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <arango-cpp/PrivateImpl.h>
 #include <arango-cpp/Collection.h>
 #include <arango-cpp/Graph.h>
