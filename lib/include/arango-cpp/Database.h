@@ -39,10 +39,19 @@ class Database {
   auto createCollection(input::CollectionCreateInput) -> Collection;
   auto createGraph(input::GraphCreateInput) -> Graph;
 
+  // Delete functions
+
+  auto deleteDatabase(std::string, input::DatabaseDeleteInput = {}) -> bool;
+  auto deleteCollection(std::string, input::CollectionDeleteInput = {} ) -> bool;
+
   // Access functions
   auto collection(std::string) -> Collection;
   auto graph(std::string) -> Graph;
   auto name() -> std::string;
+  auto info() -> jsoncons::json;
+
+  auto hasCollection(std::string) -> bool;
+  auto hasDatabase(std::string name) -> bool;
 
  private:
   private_impl_ptr p_;

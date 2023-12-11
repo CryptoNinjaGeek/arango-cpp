@@ -25,7 +25,7 @@ class Collection {
   auto head(jsoncons::json) -> jsoncons::json;
 
   // Document modifications
-  auto insert(const jsoncons::json& doc, input::InsertInput) -> jsoncons::json;
+  auto insert(const jsoncons::json& doc, input::InsertInput = {}) -> jsoncons::json;
   auto remove(const jsoncons::json&, input::DeleteInput = {}) -> bool;
   auto update(const jsoncons::json& doc, input::UpdateInput) -> jsoncons::json;
   auto replace(const jsoncons::json& doc, input::ReplaceInput input = {}) -> jsoncons::json;

@@ -12,6 +12,7 @@ namespace arangocpp {
 class RequestPimpl : public PrivateImpl {
  public:
   HttpMethod method_{HttpMethod::GET};
+  bool is_admin_{false};
   std::string id_;
   std::string endpoint_;
   std::string data_;
@@ -75,6 +76,12 @@ auto Request::headers(std::vector<string_pair> headers) -> Request {
   return *this;
 }
 
+auto Request::isAdmin(bool is_admin) -> Request {
+  auto p = RequestPimpl::pimpl(p_);
+  p->is_admin_ = std::move(is_admin);
+  return *this;
+}
+
 auto Request::endpoint(const std::string& endpoint) -> Request {
   auto p = RequestPimpl::pimpl(p_);
   auto tmp_endpoint = tools::trim(endpoint);
@@ -131,4 +138,8 @@ auto Request::headers() -> std::vector<string_pair> {
   return p->headers_;
 }
 
+auto Request::isAdmin() ->  bool {
+  auto p = RequestPimpl::pimpl(p_);
+  return p->is_admin_;
+}
 }  // namespace arango-cpp

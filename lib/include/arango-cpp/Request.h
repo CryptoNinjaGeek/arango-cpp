@@ -23,6 +23,7 @@ class Request {
   auto id(std::string) -> Request;
   auto parameters(std::vector<string_pair>) -> Request;
   auto headers(std::vector<string_pair>) -> Request;
+  auto isAdmin(bool) -> Request;
   auto database() -> std::string;
   auto collection() -> std::string;
   auto endpoint() -> std::string;
@@ -32,6 +33,7 @@ class Request {
   auto data() -> std::string;
   auto parameters() -> std::vector<string_pair>;
   auto headers() -> std::vector<string_pair>;
+  auto isAdmin() -> bool;
 
  private:
   private_impl_ptr p_;

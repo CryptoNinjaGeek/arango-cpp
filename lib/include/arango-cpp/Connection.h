@@ -5,6 +5,8 @@
 #include <arango-cpp/Request.h>
 #include <arango-cpp/Response.h>
 #include <arango-cpp/PrivateImpl.h>
+#include <jsoncons/json.hpp>
+#include <arango-cpp/input/DatabaseInput.h>
 
 namespace arangocpp {
 class Connection;
@@ -28,6 +30,11 @@ class Connection {
   auto sendRequest(Request) -> Response;
 
   static auto standardHeaders(std::vector<string_pair>&) -> void;
+
+  // Access functions
+  auto createDatabase(input::DatabaseCreateInput) -> Database;
+  auto deleteDatabase(std::string, input::DatabaseDeleteInput = {}) -> bool;
+  auto databases(bool onlyWithAccess = false) -> std::vector<std::string>;
 
  private:
   private_impl_ptr p_;

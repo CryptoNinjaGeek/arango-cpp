@@ -36,6 +36,9 @@ add_library(arango-cpp SHARED
         include/arango-cpp/input/DocumentInput.h
         include/arango-cpp/input/IndexInput.h
         include/arango-cpp/Cursor.h
+        src/Backup.cpp
+        include/arango-cpp/Backup.h
+        include/arango-cpp/input/BackupInput.h
 )
 
 add_library(arangocpp::arangocpp ALIAS arango-cpp)
