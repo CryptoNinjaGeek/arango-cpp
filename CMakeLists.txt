@@ -3,6 +3,7 @@ project(arango-cpp CXX)
 
 option(ARANGO_CPP_TESTS "Build Tests" ON)
 option(ARANGO_CPP_EXAMPLES "Build EXAMPLES" ON)
+option(ARANGO_ENTERPRISE "Build enterprise tests" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 
