@@ -2,7 +2,6 @@
 
 #include <jsoncons/json.hpp>
 #include <string>
-#include <iostream>
 
 namespace arangocpp::tools {
 

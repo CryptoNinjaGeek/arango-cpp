@@ -2,6 +2,8 @@
 
 #include <string>
 #include <arango-cpp/Database.h>
+#include <arango-cpp/Backup.h>
+#include <arango-cpp/Administration.h>
 #include <arango-cpp/Request.h>
 #include <arango-cpp/Response.h>
 #include <arango-cpp/PrivateImpl.h>
@@ -16,9 +18,13 @@ class ResolveRecord;
 class Connection {
  public:
   Connection();
-
   ~Connection() = default;
 
+  // Interfaces
+  auto backup() -> Backup;
+  auto administration() -> Administration;
+
+  // Setup
   auto host(const std::string&) -> Connection&;
   auto hosts(const std::vector<std::string>&) -> Connection&;
   auto auth(std::string, std::string) -> Connection&;

@@ -5,7 +5,6 @@
 #include <arango-cpp/Request.h>
 #include <arango-cpp/Tools.h>
 #include <string>
-#include <utility>
 
 namespace arangocpp {
 
@@ -22,8 +21,7 @@ class RequestPimpl : public PrivateImpl {
   std::vector<string_pair> params_;
   std::vector<string_pair> headers_;
 
- public:
-  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<RequestPimpl>(p); }
+  static auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<RequestPimpl>(p); }
 };
 
 Request::Request() { p_ = std::make_shared<RequestPimpl>(); }

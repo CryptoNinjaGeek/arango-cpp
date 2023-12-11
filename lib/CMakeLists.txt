@@ -39,6 +39,8 @@ add_library(arango-cpp SHARED
         src/Backup.cpp
         include/arango-cpp/Backup.h
         include/arango-cpp/input/BackupInput.h
+        include/arango-cpp/Administration.h
+        src/Administration.cpp
 )
 
 add_library(arangocpp::arangocpp ALIAS arango-cpp)

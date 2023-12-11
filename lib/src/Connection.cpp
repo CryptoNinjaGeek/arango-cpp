@@ -10,11 +10,6 @@
 
 #include <cpr/cpr.h>
 #include <iostream>
-#include <memory>
-#include <utility>
-
-// #define DEBUG_OUTPUT
-//  #define DEBUG_OUTPUT_URL
 
 namespace arangocpp {
 
@@ -28,8 +23,7 @@ class ConnectionPimpl : public PrivateImpl {
   std::vector<ResolveRecord> resolvers_;
   AuthType auth_type_{AuthType::NONE};
 
- public:
-  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<ConnectionPimpl>(p); }
+  static auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<ConnectionPimpl>(p); }
 
   auto host() -> std::string {
     if (!endpoints_.empty())

@@ -11,8 +11,6 @@
 
 #include <arango-cpp/private/CollectionPrivate.h>
 
-#include <utility>
-
 namespace arangocpp {
 
 Collection::Collection(const Connection& conn, const Database& db, std::string name) {

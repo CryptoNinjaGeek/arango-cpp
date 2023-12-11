@@ -4,12 +4,9 @@
 
 #include <arango-cpp/Backup.h>
 #include <arango-cpp/Connection.h>
-#include <arango-cpp/Database.h>
 #include <arango-cpp/Response.h>
 #include <arango-cpp/Exceptions.h>
 #include <arango-cpp/Tools.h>
-
-#include <arango-cpp/private/CollectionPrivate.h>
 
 namespace arangocpp {
 
@@ -17,8 +14,7 @@ class BackupPimpl : public PrivateImpl {
  public:
   Connection connection_;
 
- public:
-  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<BackupPimpl>(p); }
+  static auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<BackupPimpl>(p); }
 };
 
 Backup::Backup(const Connection& conn) {

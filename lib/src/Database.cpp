@@ -9,9 +9,6 @@
 
 #include <jsoncons/json.hpp>
 
-#include <iostream>
-#include <utility>
-
 using namespace jsoncons;
 using namespace jsoncons::literals;
 using namespace arangocpp::tools;
@@ -23,8 +20,7 @@ class DatabasePimpl : public PrivateImpl {
   Connection connection_;
   std::string name_;
 
- public:
-  static inline auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<DatabasePimpl>(p); }
+  static auto pimpl(const std::shared_ptr<PrivateImpl>& p) { return std::dynamic_pointer_cast<DatabasePimpl>(p); }
 };
 
 Database::Database(const Connection& conn, std::string name) {

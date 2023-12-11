@@ -2,9 +2,7 @@
 
 #include <exception>
 #include <sstream>
-#include <iostream>
 #include <string>
-#include <string_view>
 
 class AuthenticationError : public std::exception {
  public:
